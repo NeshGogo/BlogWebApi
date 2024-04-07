@@ -10,6 +10,7 @@ namespace Domain.Repositories
     {
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(Func<T,bool> condition, CancellationToken cancellationToken = default);
         void Insert(T entity);
         void Remove(T entity);
     }

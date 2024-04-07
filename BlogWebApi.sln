@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogWebApi", "BlogWebApi\Bl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{9542EB30-4B14-432C-B343-71953D81B5A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{82B281B8-15BE-4054-85AC-E8BFBFF12AAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,9 +19,16 @@ Global
 		{A7EEDC3D-1FE1-477A-80C1-0E80A8B32C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7EEDC3D-1FE1-477A-80C1-0E80A8B32C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7EEDC3D-1FE1-477A-80C1-0E80A8B32C01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B281B8-15BE-4054-85AC-E8BFBFF12AAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B281B8-15BE-4054-85AC-E8BFBFF12AAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B281B8-15BE-4054-85AC-E8BFBFF12AAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B281B8-15BE-4054-85AC-E8BFBFF12AAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{82B281B8-15BE-4054-85AC-E8BFBFF12AAB} = {9542EB30-4B14-432C-B343-71953D81B5A5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE1DB5C8-A9E2-498B-93B7-D06B0379FCB6}

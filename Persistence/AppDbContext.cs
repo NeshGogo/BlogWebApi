@@ -5,6 +5,7 @@ namespace Persistence
 {
     public class AppDbContext : IdentityDbContext
     {
+        public const string Schema = "BlogPost";
         public AppDbContext(DbContextOptions opt) : base(opt)
         {            
         }

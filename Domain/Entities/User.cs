@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : IdentityUser, IId
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -11,8 +12,11 @@ namespace Domain.Entities
         public string? Bio { get; set; }
         public Guid? UserImageId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+        [MaxLength(200)]
         public string CreatedBy { get; set; }
-        public DateTime UpdatedBy { get; set; }
+        public DateTime Updated { get; set; }
+        [MaxLength(200)]
+        public string UpdatedBy { get; set; }
 
         public string? UserImageUrl { get; set; }
         public ICollection<UserFollower> UserFollowers { get; set; }

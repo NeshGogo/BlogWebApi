@@ -1,6 +1,8 @@
-﻿namespace Domain.Entities
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+
+namespace Domain.Entities
 {
-    public class User 
+    public class User : IdentityUser
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -12,7 +14,7 @@
         public string CreatedBy { get; set; }
         public DateTime UpdatedBy { get; set; }
 
-        public UserImage? UserImage { get; set; }
+        public string? UserImageUrl { get; set; }
         public ICollection<UserFollower> UserFollowers { get; set; }
         public ICollection<UserFollowing> UserFollowings { get; set; }
         public ICollection<Post> Posts { get; set; }

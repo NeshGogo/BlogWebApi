@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public abstract class EntityBase
+    public abstract class EntityBase : IId
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedDate { get; set; } = DateTime.Now;

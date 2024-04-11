@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  blogwebapi:
+    image: ${DOCKER_REGISTRY-}blogwebapi
+    build:
+      context: .
+      dockerfile: BlogWebApi/Dockerfile
+        
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=S3cretPassword!123
+      - POSTGRES_USER=onion_user
+      - POSTGRES_DB=onion_architecture_db

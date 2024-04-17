@@ -26,7 +26,7 @@ builder.Services.AddDbContextPool<AppDbContext>(opt =>
 });
 
 // Register Identity
-builder.Services.AddIdentityApiEndpoints<User>(opt =>
+builder.Services.AddIdentityApiEndpoints<IdentityUser>(opt =>
 {
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
@@ -76,7 +76,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 // --> Map Identity endpoints
-app.MapIdentityApi<User>();
+app.MapGroup("Account").MapIdentityApi<IdentityUser>();
 
 app.MapControllers();
 

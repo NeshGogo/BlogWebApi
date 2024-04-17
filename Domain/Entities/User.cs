@@ -3,9 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities
 {
-    public class User : IdentityUser, IId
+    public class User : IdentityUser
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }

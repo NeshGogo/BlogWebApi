@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Domain.Repositories
 {
@@ -11,7 +6,7 @@ namespace Domain.Repositories
     {
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<bool> ExistsAsync(Expression<Func<T, bool>>, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken = default);
         void Insert(T entity);
         void Remove(T entity);
     }

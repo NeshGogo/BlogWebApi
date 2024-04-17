@@ -1,16 +1,11 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
-    internal sealed class Repository<T> : IRepository<T> where T : class, IId
+    internal class Repository<T> : IRepository<T> where T : class
     {
         private readonly AppDbContext _context;
         private DbSet<T> _entities;
@@ -38,7 +33,7 @@ namespace Persistence.Repositories
 
 
         public async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-            => await Entities.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            => await Entities.FindAsync(id, cancellationToken);
 
         public void Insert(T entity) => Entities.Add(entity);
 

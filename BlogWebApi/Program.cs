@@ -80,4 +80,6 @@ app.MapGroup("Account").MapIdentityApi<User>();
 
 app.MapControllers();
 
+// --> Run migrations and seed data.
+PreDb.PrePopulation(app.Services);
 app.Run();

@@ -8,7 +8,7 @@ namespace Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            builder.ToTable("Comments", AppDbContext.Schema);
+            builder.ToTable("Comments");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Content).IsRequired().HasMaxLength(150);
             builder.HasOne(p => p.User);

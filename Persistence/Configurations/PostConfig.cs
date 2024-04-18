@@ -8,7 +8,7 @@ namespace Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Post> builder)
         {
-            builder.ToTable("Posts", AppDbContext.Schema);
+            builder.ToTable("Posts");
             builder.HasKey(x => x.Id);
             builder.Property(p => p.Description).HasMaxLength(150);
         }

@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : IdentityUser<Guid>
     {
         public string Name { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public string? Bio { get; set; }
-        public Guid? UserImageId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [MaxLength(200)]
         public string CreatedBy { get; set; }

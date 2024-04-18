@@ -13,7 +13,7 @@ namespace Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<PostAttachment> builder)
         {
-            builder.ToTable("PostAttachments", AppDbContext.Schema);
+            builder.ToTable("PostAttachments");
             builder.HasKey(x => x.Id);
             builder.Property(p => p.Name).IsRequired().HasMaxLength(128);
             builder.Property(p => p.Url).IsRequired().HasMaxLength(256);

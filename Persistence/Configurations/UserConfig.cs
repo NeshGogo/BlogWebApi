@@ -8,7 +8,7 @@ namespace Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.ToTable("Users", AppDbContext.Schema);
+            builder.ToTable("Users");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).IsRequired().HasMaxLength(50);
             builder.Property(x => x.UserName).IsRequired().HasMaxLength(20);

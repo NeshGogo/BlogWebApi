@@ -17,9 +17,20 @@ namespace Presentation.Controllers
         }
 
         [SwaggerOperation(
+            Summary = "Get all users",
+            Description = "You have to be log in.",
+            Tags = ["Users"]
+            )]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(CancellationToken cancellation)
+        {
+            return (await _serviceManager.UserService.GetAllAsync(cancellation)).ToList();
+        }
+
+        [SwaggerOperation(
             Summary = "Create a new user",
             Description = "You don't required any permision to do it.",
-            Tags = ["User settings"]
+            Tags = ["Users"]
             )]
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserForCreationDto creationDto, CancellationToken cancellation)

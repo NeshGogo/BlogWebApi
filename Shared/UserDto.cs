@@ -12,6 +12,6 @@ namespace Shared
         public string UserName { get; set; }
         public string Email { get; set; }
         public string? Bio { get; set; }
-        public Guid? UserImageId { get; set; }
+        public string? UserImageUrl { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace Persistence.Configurations
             builder.Property(x => x.UserName).IsRequired().HasMaxLength(20);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(50);
             builder.Property(x => x.Bio).HasMaxLength(150);
-            builder.Property(x => x.UserImageUrl).IsRequired().HasMaxLength(256);
+            builder.Property(x => x.UserImageUrl).HasMaxLength(256);
         }
     }
 }

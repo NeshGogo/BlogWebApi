@@ -6,8 +6,6 @@ namespace Domain.Entities
     public class User : IdentityUser<Guid>
     {
         public string Name { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
         public string? Bio { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [MaxLength(200)]

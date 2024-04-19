@@ -1,10 +1,7 @@
-﻿using Domain.Repositories;
+﻿using Domain.Entities;
+using Domain.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services
 {
@@ -12,9 +9,9 @@ namespace Services
     {
         private readonly Lazy<IUserService> _lazyUserService;
 
-        public ServiceManager(IRepositoryManager repositoryManager)
+        public ServiceManager(IRepositoryManager repositoryManager, UserManager<User> userManager)
         {
-           _lazyUserService = new  Lazy<IUserService>(() => new UserService(repositoryManager)); 
+           _lazyUserService = new  Lazy<IUserService>(() => new UserService(repositoryManager, userManager)); 
         } 
         public IUserService UserService => _lazyUserService.Value;
     }

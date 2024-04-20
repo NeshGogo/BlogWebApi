@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
 using Shared;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,6 +22,7 @@ namespace Presentation.Controllers
             Description = "You have to be log in.",
             Tags = ["Users"]
             )]
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(CancellationToken cancellation)
         {
@@ -44,17 +46,21 @@ namespace Presentation.Controllers
             Tags = ["Users"]
             )]
         [HttpPost("Login")]
-        public async Task<ActionResult<string>> Login([FromBody] UserLoginDto userLoginDto, CancellationToken cancellation)
+        public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto, CancellationToken cancellation)
         {
-            return  await _serviceManager.UserService.LoginByEmailAndPassword(userLoginDto, cancellation);
+            var token =  await _serviceManager.UserService.LoginByEmailAndPassword(userLoginDto, cancellation);
+            return Ok(new
+            {
+                Token = token,
+            });
         }
-
 
         [SwaggerOperation(
             Summary = "Update user information",
             Description = "You have to be log in.",
             Tags = ["Users"]
             )]
+        [Authorize]
         [HttpPut("Update/{id:Guid}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserForUpdateDto updateDto, CancellationToken cancellation)
         {

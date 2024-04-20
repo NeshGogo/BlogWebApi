@@ -51,6 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            ClockSkew = TimeSpan.Zero
        }
     );
+builder.Services.AddAuthorization();
 
 
 // --> Registering the services Manager and Repository Manager

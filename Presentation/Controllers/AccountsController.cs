@@ -32,10 +32,22 @@ namespace Presentation.Controllers
             Description = "You don't required any permision to do it.",
             Tags = ["Users"]
             )]
-        [HttpPost]
+        [HttpPost("Register")]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserForCreationDto creationDto, CancellationToken cancellation)
         {
             return await _serviceManager.UserService.CreateAsync(creationDto, cancellation);
+        }
+
+        [SwaggerOperation(
+            Summary = "Update user information",
+            Description = "You have to be log in.",
+            Tags = ["Users"]
+            )]
+        [HttpPut("Update/{id:Guid}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserForUpdateDto updateDto, CancellationToken cancellation)
+        {
+             await _serviceManager.UserService.UpdateAsync(id, updateDto, cancellation);
+            return NoContent();
         }
     }
 }

@@ -73,10 +73,17 @@ namespace Services
             var user = await _repositoryManager.UserRepo.GetByIdAsync(userId, cancellationToken);
             if (user is null)
                 throw new UserNotFoundException(userId);
-           
+            
+            var userNameExists = await _repositoryManager.UserRepo.ExistsAsync(
+                p => p.Id != userId && p.UserName == userForUpdateDto.UserName, 
+                cancellationToken);
+            if (userNameExists)
+                throw new UserNameAlreadyExistsException(userForUpdateDto.UserName);
+
             user.Name = userForUpdateDto.Name;
             user.Bio = userForUpdateDto.Bio;
             user.UserName = userForUpdateDto.UserName;
+            user.Updated = DateTime.UtcNow;
 
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
         }

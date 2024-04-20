@@ -1,15 +1,15 @@
-using Services;
-using Services.Abstractions;
-using Domain.Repositories;
-using Persistence.Repositories;
-using Persistence;
-using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+using Domain.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Persistence;
+using Persistence.Repositories;
+using Services;
+using Services.Abstractions;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +45,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            ValidateIssuer = true,
            ValidateAudience = false,
            ValidateLifetime = true,
+           ValidIssuers = [builder.Configuration["jwt:validIssuer"]],
            ValidateIssuerSigningKey = true,
            IssuerSigningKey = new SymmetricSecurityKey(
                Encoding.UTF8.GetBytes(builder.Configuration["jwt:key"])),
@@ -66,6 +67,28 @@ builder.Services.AddSwaggerGen(opt =>
 {
     opt.EnableAnnotations();
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog Post API", Version = "v1" });
+    opt.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme()
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+    });
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id=JwtBearerDefaults.AuthenticationScheme
+                }
+            },
+            new string[]{}
+        }
+    });
 });
 
 var app = builder.Build();

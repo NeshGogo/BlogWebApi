@@ -39,6 +39,18 @@ namespace Presentation.Controllers
         }
 
         [SwaggerOperation(
+            Summary = "Authenticate user by email and password",
+            Description = "You don't required any permision to do it.",
+            Tags = ["Users"]
+            )]
+        [HttpPost("Login")]
+        public async Task<ActionResult<string>> Login([FromBody] UserLoginDto userLoginDto, CancellationToken cancellation)
+        {
+            return  await _serviceManager.UserService.LoginByEmailAndPassword(userLoginDto, cancellation);
+        }
+
+
+        [SwaggerOperation(
             Summary = "Update user information",
             Description = "You have to be log in.",
             Tags = ["Users"]

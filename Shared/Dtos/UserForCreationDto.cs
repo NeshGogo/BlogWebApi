@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 
-namespace Shared
+namespace Shared.Dtos
 {
     public sealed class UserForCreationDto
     {

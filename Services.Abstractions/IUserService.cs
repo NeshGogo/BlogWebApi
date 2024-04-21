@@ -1,4 +1,4 @@
-﻿using Shared;
+﻿using Shared.Dtos;
 
 namespace Services.Abstractions
 {

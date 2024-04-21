@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
-using Shared;
+using Shared.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Controllers

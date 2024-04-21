@@ -17,3 +17,11 @@ services:
       - POSTGRES_PASSWORD=S3cretPassword!123
       - POSTGRES_USER=onion_user
       - POSTGRES_DB=onion_architecture_db
+  mail:
+    image: bytemark/smtp
+    restart: always
+    environment:
+      RELAY_HOST: smtp.blogpost.com
+      RELAY_PORT: 587
+      # RELAY_USERNAME: alice@example.com
+      # RELAY_PASSWORD: secretpassword

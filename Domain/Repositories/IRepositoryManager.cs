@@ -8,5 +8,6 @@ namespace Domain.Repositories
         IRepository<Post> PostRepo { get; }
         IRepository<Post> CommentRepo { get; }
         IUnitOfWork UnitOfWork { get; }
+        IEmailRepository EmailRepository { get; }
     }
 }

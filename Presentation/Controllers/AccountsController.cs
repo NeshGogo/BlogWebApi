@@ -46,13 +46,9 @@ namespace Presentation.Controllers
             Tags = ["Users"]
             )]
         [HttpPost("Login")]
-        public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto, CancellationToken cancellation)
+        public async Task<ActionResult<TokenDto>> Login([FromBody] UserLoginDto userLoginDto, CancellationToken cancellation)
         {
-            var token =  await _serviceManager.UserService.LoginByEmailAndPassword(userLoginDto, cancellation);
-            return Ok(new
-            {
-                Token = token,
-            });
+            return await _serviceManager.UserService.LoginByEmailAndPassword(userLoginDto, cancellation);
         }
 
         [SwaggerOperation(

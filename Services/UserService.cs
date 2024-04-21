@@ -9,6 +9,7 @@ using Services.Abstractions;
 using Shared.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Services
@@ -19,6 +20,7 @@ namespace Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
+        private User? _user;
 
         public UserService(
             IRepositoryManager repositoryManager,
@@ -80,20 +82,20 @@ namespace Services
             return dto;
         }
 
-        public async Task<string> LoginByEmailAndPassword(UserLoginDto userLogin, CancellationToken cancellationToken = default)
+        public async Task<TokenDto> LoginByEmailAndPassword(UserLoginDto userLogin, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByEmailAsync(userLogin.Email);
+            _user = await _userManager.FindByEmailAsync(userLogin.Email);
 
-            if (user is null)
+            if (_user is null)
                 throw new UserNotFoundByEmailException(userLogin.Email);
 
-            var result = await _signInManager.PasswordSignInAsync(user, userLogin.Password, true, false);
+            var result = await _signInManager.PasswordSignInAsync(_user, userLogin.Password, true, false);
 
             if (!result.Succeeded)
                 throw new UserLoginByEmailOrPasswordException();
 
-            var token = await CreateTokenAsync(user);
-            return token;
+            var tokenDto = await CreateTokenAsync(true);
+            return tokenDto;
         }
 
         public async Task UpdateAsync(Guid userId, UserForUpdateDto userForUpdateDto, CancellationToken cancellationToken = default)
@@ -116,13 +118,37 @@ namespace Services
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-
-        public async Task<string> CreateTokenAsync(User user)
+        public async Task<TokenDto> CreateTokenAsync(bool populateExp)
         {
             var signingCredentials = GetSigningCredentials();
-            var claims = await GetClaims(user);
+            var claims = await GetClaims();
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
-            return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+            var refreshToken = GenerateRefreshToken();
+            _user.RefreshToken = refreshToken;
+            
+            if(populateExp)
+                _user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+            await _userManager.UpdateAsync(_user);
+
+            var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+            return new TokenDto(token, refreshToken);
+        }
+
+        public async Task<TokenDto> RefreshTokenAsync(TokenDto tokenDto)
+        {
+            var principal = GetPrincipalFromExpiredToken(tokenDto.Token);
+            string userName = principal.FindFirst("UserName")?.Value;
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user is null || user.RefreshToken != tokenDto.RefreshToken || 
+                user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                throw new RefreshTokenException();
+
+            _user = user;
+            return await CreateTokenAsync(false);
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -132,24 +158,24 @@ namespace Services
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
 
-        private async Task<List<Claim>> GetClaims(User user)
+        private async Task<List<Claim>> GetClaims()
         {
             var claims = new List<Claim>()
             {
-                new Claim("UserName", user.UserName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Name),
+                new Claim("UserName", _user.UserName),
+                new Claim(ClaimTypes.Email, _user.Email),
+                new Claim(ClaimTypes.Name, _user.Name),
             };
 
             if (_userManager.SupportsUserRole)
             {
-                var roles = await _userManager.GetRolesAsync(user);
+                var roles = await _userManager.GetRolesAsync(_user);
                 foreach (var role in roles)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 }
             }
-            
+
             return claims;
         }
 
@@ -166,5 +192,43 @@ namespace Services
             );
             return tokenOptions;
         }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
+        }
+
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidator = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidIssuers = [_configuration["jwt:validIssuer"]],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+               Encoding.UTF8.GetBytes(_configuration["jwt:key"])),
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidator, out securityToken);
+
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken is null ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+            return principal;
+        }        
     }
 }

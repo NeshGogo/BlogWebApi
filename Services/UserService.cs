@@ -87,7 +87,6 @@ namespace Services
             if (user is null)
                 throw new UserNotFoundByEmailException(userLogin.Email);
 
-            _userManager.CheckPasswordAsync(user, userLogin.Password);
             var result = await _signInManager.PasswordSignInAsync(user, userLogin.Password, true, false);
 
             if (!result.Succeeded)

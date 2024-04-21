@@ -7,6 +7,8 @@ namespace Domain.Entities
     {
         public string Name { get; set; }
         public string? Bio { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [MaxLength(200)]
         public string CreatedBy { get; set; }

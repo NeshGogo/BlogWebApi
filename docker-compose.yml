@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: BlogWebApi/Dockerfile
+    ports:
+    - 51944:8080
         
   postgres:
     image: postgres:14-alpine
@@ -18,10 +20,12 @@ services:
       - POSTGRES_USER=onion_user
       - POSTGRES_DB=onion_architecture_db
   mail:
-    image: bytemark/smtp
+    image: rnwood/smtp4dev
     restart: always
-    environment:
-      RELAY_HOST: smtp.blogpost.com
-      RELAY_PORT: 587
-      # RELAY_USERNAME: alice@example.com
-      # RELAY_PASSWORD: secretpassword
+    ports:
+    - 25:25
+    # environment:
+    #   RELAY_HOST: smtp.blogpost.com
+    #   RELAY_PORT: 587
+    #   RELAY_USERNAME: alice@example.com
+    #   RELAY_PASSWORD: secretpassword

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
 using Shared.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Presentation.Controllers
 {
@@ -27,6 +28,18 @@ namespace Presentation.Controllers
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(CancellationToken cancellation)
         {
             return (await _serviceManager.UserService.GetAllAsync(cancellation)).ToList();
+        }
+
+        [SwaggerOperation(
+            Summary = "Confirm user email after register",
+            Description = "You have to be log in.",
+            Tags = ["Users"]
+            )]
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery]string token, [FromQuery]Guid userId, CancellationToken cancellation)
+        {
+            await _serviceManager.UserService.ConfirmUserEmailAsync(token, userId, cancellation);
+            return NoContent();
         }
 
         [SwaggerOperation(

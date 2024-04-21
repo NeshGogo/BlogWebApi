@@ -55,6 +55,18 @@ namespace Services
                 throw new UserCreationErrorException(msg);
             }
 
+            // --> send confirm email notification
+            var host = _configuration["HostUrl"];
+            var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user); 
+            var url = new Uri($"{host}/api/Accounts/ConfirmEmail?token={Uri.EscapeDataString(emailConfirmToken)}&userId={Uri.EscapeDataString(user.Id.ToString())}");
+            var emailBody = @$"Hi {user.Name},
+
+                Thanks for registering in blob post we are thrilled to have you here. There is a last step that we need you to take and is to confirm your email in the link below.
+
+                {url.AbsoluteUri}
+            ";
+            await _repositoryManager.EmailRepository.SendAsync([user.Email], "Email Confirmation", emailBody, cancellationToken);
+
             return user.Adapt<UserDto>();
         }
 
@@ -151,6 +163,20 @@ namespace Services
             return await CreateTokenAsync(false);
         }
 
+        public async Task ConfirmUserEmailAsync(string token, Guid userId, CancellationToken cancellation = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                throw new UserNotFoundException(userId);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                var msg = "There are some errors: \n";
+                msg += string.Join("\n", result.Errors.Select(p => p.Description));
+                throw new UserCreationErrorException(msg);
+            }
+        }
+
         private SigningCredentials GetSigningCredentials()
         {
             var key = Encoding.UTF8.GetBytes(_configuration["jwt:key"]);
@@ -229,6 +255,6 @@ namespace Services
                 throw new SecurityTokenException("Invalid token");
             }
             return principal;
-        }        
+        }
     }
 }

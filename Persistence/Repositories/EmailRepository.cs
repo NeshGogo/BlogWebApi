@@ -26,7 +26,7 @@ namespace Persistence.Repositories
             using var client = new SmtpClient();
             var port = int.Parse(settings["Port"]);
             client.Connect(settings["Host"], port, false, cancellation);
-            await client.SendAsync(message, cancellation);
+            var result = await client.SendAsync(message, cancellation);
             client.Disconnect(true, cancellation);
         }
     }

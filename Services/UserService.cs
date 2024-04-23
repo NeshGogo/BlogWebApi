@@ -58,14 +58,8 @@ namespace Services
             // --> send confirm email notification
             var host = _configuration["HostUrl"];
             var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user); 
-            var url = new Uri($"{host}/api/Accounts/ConfirmEmail?token={Uri.EscapeDataString(emailConfirmToken)}&userId={Uri.EscapeDataString(user.Id.ToString())}");
-            var emailBody = @$"Hi {user.Name},
-
-                Thanks for registering in blob post we are thrilled to have you here. There is a last step that we need you to take and is to confirm your email in the link below.
-
-                {url.AbsoluteUri}
-            ";
-            await _repositoryManager.EmailRepository.SendAsync([user.Email], "Email Confirmation", emailBody, cancellationToken);
+            var body = user.BuildConfirmEmailBody(host, emailConfirmToken);
+            await _repositoryManager.EmailRepository.SendAsync([user.Email], "Email Confirmation", body, cancellation: cancellationToken);
 
             return user.Adapt<UserDto>();
         }

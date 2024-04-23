@@ -1,3 +1,4 @@
+using BlogWebApi.Extensions;
 using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -92,6 +93,10 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
+app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILogger<object>>());
+
+/*if(app.Environment.IsProduction())
+    app.UseHsts();*/
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -50,8 +50,8 @@ namespace Services
             var result = await _userManager.CreateAsync(user, userForCreationDto.Password);
             if (!result.Succeeded)
             {
-                var msg = "There are some errors: \n";
-                msg += string.Join("\n", result.Errors.Select(p => p.Description));
+                var msg = "There are some errors: ";
+                msg += string.Join(",", result.Errors.Select(p => p.Description));
                 throw new UserCreationErrorException(msg);
             }
 
@@ -165,8 +165,8 @@ namespace Services
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
             {
-                var msg = "There are some errors: \n";
-                msg += string.Join("\n", result.Errors.Select(p => p.Description));
+                var msg = "There are some errors: ";
+                msg += string.Join(",", result.Errors.Select(p => p.Description));
                 throw new UserCreationErrorException(msg);
             }
         }

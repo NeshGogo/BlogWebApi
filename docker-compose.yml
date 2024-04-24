@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: BlogWebApi/Dockerfile
+    ports:
+    - 51944:8080
         
   postgres:
     image: postgres:14-alpine

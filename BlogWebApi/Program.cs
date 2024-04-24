@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     );
 builder.Services.AddAuthorization();
 
-
+builder.Services.AddHttpContextAccessor();
 // --> Registering the services Manager and Repository Manager
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
@@ -95,8 +95,8 @@ builder.Services.AddSwaggerGen(opt =>
 var app = builder.Build();
 app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILogger<object>>());
 
-/*if(app.Environment.IsProduction())
-    app.UseHsts();*/
+if (app.Environment.IsProduction())
+    app.UseHsts();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

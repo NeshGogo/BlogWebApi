@@ -2,6 +2,7 @@
 using Domain.Exceptions.User;
 using Domain.Repositories;
 using Mapster;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -20,9 +21,12 @@ namespace Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ClaimsPrincipal? _loggedInUser;
         private User? _user;
 
         public UserService(
+            IHttpContextAccessor httpContextAccessor,
             IRepositoryManager repositoryManager,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
@@ -32,6 +36,8 @@ namespace Services
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
+            _loggedInUser = _httpContextAccessor.HttpContext.User;
         }
 
         public async Task<UserDto> CreateAsync(UserForCreationDto userForCreationDto, CancellationToken cancellationToken = default)
@@ -120,6 +126,7 @@ namespace Services
             user.Bio = userForUpdateDto.Bio;
             user.UserName = userForUpdateDto.UserName;
             user.Updated = DateTime.UtcNow;
+            user.UpdatedBy = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
 
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
         }

@@ -1,6 +1,8 @@
 using BlogWebApi.Extensions;
+using Contracts;
 using Domain.Entities;
 using Domain.Repositories;
+using LoggerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +10,20 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Repositories;
+using Serilog;
 using Services;
 using Services.Abstractions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --> Log configuration
+Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs/app.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
 
 // Add services to the container.
 
@@ -59,6 +70,9 @@ builder.Services.AddHttpContextAccessor();
 // --> Registering the services Manager and Repository Manager
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+
+// --> Logger service
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 
 builder.Services.AddControllers();

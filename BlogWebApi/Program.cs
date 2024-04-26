@@ -14,14 +14,17 @@ using Serilog;
 using Services;
 using Services.Abstractions;
 using System.Text;
+using Serilog.Sinks.Seq;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --> Log configuration
 Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             .WriteTo.Console()
-            .WriteTo.File("logs/app.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.Seq(builder.Configuration["Seq:ServerUrl"], 
+                Serilog.Events.LogEventLevel.Information)
+            .WriteTo.File("logs/app.txt", rollingInterval: RollingInterval.Day)            
             .CreateLogger();
 
 
@@ -73,6 +76,7 @@ builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
 // --> Logger service
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddSerilog();
 
 
 builder.Services.AddControllers();
@@ -107,6 +111,21 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
+app.UseSerilogRequestLogging(opt =>
+{
+    opt.EnrichDiagnosticContext = (context, httpContext) =>
+    {
+        context.Set("RequestRemoteIpAddress", httpContext.Connection.RemoteIpAddress.ToString());
+        context.Set("RequestLocalIpAddress", httpContext.Connection.LocalIpAddress.ToString());
+        context.Set("RequestScheme", httpContext.Request.Scheme);
+        context.Set("RequestHost", httpContext.Request.Host.ToString());
+        context.Set("RequestPath", httpContext.Request.Path);
+        context.Set("RequestMethod", httpContext.Request.Method);
+        context.Set("RequestResponseStatus", httpContext.Response.StatusCode.ToString());
+        context.Set("RequestBrowserUserAgent", httpContext.Request.Headers.UserAgent.ToString());
+        context.Set("RequestAuthorizationHeader", httpContext.Request.Headers.Authorization.ToString());
+    };
+});
 app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILogger<object>>());
 
 if (app.Environment.IsProduction())

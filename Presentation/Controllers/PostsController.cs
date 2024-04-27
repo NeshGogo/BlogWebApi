@@ -15,6 +15,21 @@ namespace Presentation.Controllers
 
         public PostsController(IServiceManager serviceManager) => _serviceManager = serviceManager;
 
+        [SwaggerOperation(
+            Summary = "Get a post created by user",
+            Description = "You have to be log in.",
+            Tags = ["Posts"]
+            )]
+        [HttpGet(), Authorize]
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetPostById([FromQuery] bool me = false, CancellationToken cancellation = default)
+        {
+            Guid.TryParse(User.FindFirst("Id").Value, out var userId);
+            var result = me 
+                ? await _serviceManager.PostService.GetPostsByUserId(userId, cancellation) 
+                : await _serviceManager.PostService.GetPostsAllPost(cancellation);
+            return result.ToList();
+        }
+
 
         [SwaggerOperation(
             Summary = "Get a post created by user",
@@ -33,7 +48,6 @@ namespace Presentation.Controllers
         [HttpPost, Authorize]       
         public async Task<IActionResult> CreatePost([FromForm] PostForCreationDto creationDto, CancellationToken cancellation)
         {
-            var test = HttpContext.Request;
             Guid.TryParse(User.FindFirst("Id").Value, out var userid);
             var dto = await _serviceManager.PostService.CreatePostAsync(userid, creationDto, cancellation);
             return CreatedAtAction(nameof(GetPostById), new { id = dto.Id }, dto);

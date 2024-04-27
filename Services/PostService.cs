@@ -52,9 +52,16 @@ namespace Services
             return post.Adapt<PostDto>();
         }
 
-        public Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PostDto>> GetPostsAllPost(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
+            return posts.Adapt<IEnumerable<PostDto>>();
+        }
+
+        public async Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var posts = await _repositoryManager.PostRepo.GetAllByUserIdAsync(userId, cancellationToken);
+            return posts.Adapt<IEnumerable<PostDto>>();
         }
     }
 }

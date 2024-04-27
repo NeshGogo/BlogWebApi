@@ -7,7 +7,7 @@ namespace Persistence.Repositories
     public sealed class RepositoryManager : IRepositoryManager
     {
         private readonly Lazy<IRepository<User>> _LazyUserRepo;
-        private readonly Lazy<IRepository<Post>> _LazyPostRepo;
+        private readonly Lazy<IPostRepository> _LazyPostRepo;
         private readonly Lazy<IRepository<Comment>> _LazyCommentRepo;
         private readonly Lazy<IUnitOfWork> _LazyUnitOfWork;
         private readonly Lazy<IEmailRepository> _LazyEmailRepo;
@@ -15,7 +15,7 @@ namespace Persistence.Repositories
         public RepositoryManager(IConfiguration config, AppDbContext dbContext)
         {
             _LazyUserRepo = new Lazy<IRepository<User>>(() => new Repository<User>(dbContext));
-            _LazyPostRepo = new Lazy<IRepository<Post>>(() => new PostRepository(dbContext));
+            _LazyPostRepo = new Lazy<IPostRepository>(() => new PostRepository(dbContext));
             _LazyCommentRepo = new Lazy<IRepository<Comment>>(() => new Repository<Comment>(dbContext));
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));
@@ -23,7 +23,7 @@ namespace Persistence.Repositories
 
         public IRepository<User> UserRepo => _LazyUserRepo.Value;
 
-        public IRepository<Post> PostRepo => _LazyPostRepo.Value;
+        public IPostRepository PostRepo => _LazyPostRepo.Value;
 
         public IRepository<Post> CommentRepo => _LazyPostRepo.Value;
 

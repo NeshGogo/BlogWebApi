@@ -5,7 +5,7 @@ namespace Domain.Repositories
     public interface IRepositoryManager
     {
         IRepository<User> UserRepo { get; }
-        IRepository<Post> PostRepo { get; }
+        IPostRepository PostRepo { get; }
         IRepository<Post> CommentRepo { get; }
         IUnitOfWork UnitOfWork { get; }
         IEmailRepository EmailRepository { get; }

@@ -5,6 +5,7 @@
         public Guid UserId { get; set; }
         public string? Description { get; set; }
 
+        public User User { get; set; }
         public ICollection<PostAttachment> PostAttachments { get; set; }
         public ICollection<Comment> Comments { get; set; }
         public ICollection<PostLike> PostLikes { get; set; }

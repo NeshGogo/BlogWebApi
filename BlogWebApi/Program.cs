@@ -15,19 +15,25 @@ using Services;
 using Services.Abstractions;
 using System.Text;
 using Serilog.Sinks.Seq;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --> Log configuration
 Log.Logger = new LoggerConfiguration()
+            .Enrich.WithProperty("SystemName", builder.Configuration["SystemName"])
             .MinimumLevel.Information()
-            .WriteTo.Console()
-            .WriteTo.Seq(builder.Configuration["Seq:ServerUrl"], 
-                Serilog.Events.LogEventLevel.Information)
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Seq(builder.Configuration["Seq:ServerUrl"])
+            .WriteTo.Console()            
             .WriteTo.File("logs/app.txt", rollingInterval: RollingInterval.Day)            
             .CreateLogger();
 
-
+builder.Host.UseSerilog(Log.Logger);
+Log.Information("Staring host");
 // Add services to the container.
 
 // --> Register the controllers that are in the presentation class library (Presentation layer)

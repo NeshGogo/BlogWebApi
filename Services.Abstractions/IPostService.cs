@@ -10,5 +10,6 @@ namespace Services.Abstractions
         Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<PostDto>> GetPostsAllPost(CancellationToken cancellationToken = default);
         Task UpdatePostAsync(Guid postId, PostForUpdateDto updateDto, CancellationToken cancellationToken = default);
+        Task DeletePostAsync(Guid postId, CancellationToken cancellationToken = default);
     }
 }

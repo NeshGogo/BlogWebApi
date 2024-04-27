@@ -47,6 +47,22 @@ namespace Services
             return post.Adapt<PostDto>();
         }
 
+        public async Task DeletePostAsync(Guid postId, CancellationToken cancellationToken = default)
+        {
+            var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
+
+            if (post is null)
+                throw new PostNotFoundException(postId);
+
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+
+            if (userId != post.UserId)
+                throw new PostDoesNotBelongToUserException(userId);
+
+            _repositoryManager.PostRepo.Remove(post);
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
+        }
+
         public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default)
         {
             var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);

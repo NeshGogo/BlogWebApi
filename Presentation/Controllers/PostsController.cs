@@ -64,5 +64,17 @@ namespace Presentation.Controllers
             await _serviceManager.PostService.UpdatePostAsync(id, updateDto, cancellation);
             return NoContent();
         }
+
+        [SwaggerOperation(
+           Summary = "Delete a post",
+           Description = "You have to be log in.",
+           Tags = ["Posts"]
+           )]
+        [HttpDelete("{id:guid}"), Authorize]
+        public async Task<IActionResult> DeletePost(Guid id, CancellationToken cancellation)
+        {
+            await _serviceManager.PostService.DeletePostAsync(id, cancellation);
+            return NoContent();
+        }
     }
 }

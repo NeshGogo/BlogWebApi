@@ -16,12 +16,12 @@ namespace Presentation.Controllers
         public PostsController(IServiceManager serviceManager) => _serviceManager = serviceManager;
 
         [SwaggerOperation(
-            Summary = "Get a post created by user",
+            Summary = "Get all post by the user or not",
             Description = "You have to be log in.",
             Tags = ["Posts"]
             )]
         [HttpGet(), Authorize]
-        public async Task<ActionResult<IEnumerable<PostDto>>> GetPostById([FromQuery] bool me = false, CancellationToken cancellation = default)
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetAllPosts([FromQuery] bool me = false, CancellationToken cancellation = default)
         {
             Guid.TryParse(User.FindFirst("Id").Value, out var userId);
             var result = me 
@@ -51,6 +51,18 @@ namespace Presentation.Controllers
             Guid.TryParse(User.FindFirst("Id").Value, out var userid);
             var dto = await _serviceManager.PostService.CreatePostAsync(userid, creationDto, cancellation);
             return CreatedAtAction(nameof(GetPostById), new { id = dto.Id }, dto);
+        }
+
+        [SwaggerOperation(
+           Summary = "Update a post",
+           Description = "You have to be log in.",
+           Tags = ["Posts"]
+           )]
+        [HttpPut("{id:guid}"), Authorize]
+        public async Task<IActionResult> UpdatePost(Guid id, [FromBody] PostForUpdateDto updateDto, CancellationToken cancellation)
+        {
+            await _serviceManager.PostService.UpdatePostAsync(id, updateDto, cancellation);
+            return NoContent();
         }
     }
 }

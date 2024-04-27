@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Domain.Exceptions.Post;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Services.Abstractions;
@@ -49,6 +50,10 @@ namespace Services
         public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default)
         {
             var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
+            
+            if (post is null)
+                throw new PostNotFoundException(postId);
+           
             return post.Adapt<PostDto>();
         }
 
@@ -62,6 +67,26 @@ namespace Services
         {
             var posts = await _repositoryManager.PostRepo.GetAllByUserIdAsync(userId, cancellationToken);
             return posts.Adapt<IEnumerable<PostDto>>();
+        }
+
+        public async Task UpdatePostAsync(Guid postId, PostForUpdateDto updateDto, CancellationToken cancellationToken = default)
+        {
+            var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
+            
+            if (post is null)
+                throw new PostNotFoundException(postId);
+
+            var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+
+            if (userId != post.UserId)
+                throw new PostDoesNotBelongToUserException(userId);
+
+            post.Updated = DateTime.UtcNow;
+            post.UpdatedBy = userEmail;
+            post.Description = updateDto.Description;
+
+            await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

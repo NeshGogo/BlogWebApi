@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Dtos
 {
-    public class PostDto
+    public class PostDto : DtoBase
     {
         public Guid UserId { get; set; }
         public string? Description { get; set; }

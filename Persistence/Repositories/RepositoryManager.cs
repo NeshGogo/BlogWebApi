@@ -15,7 +15,7 @@ namespace Persistence.Repositories
         public RepositoryManager(IConfiguration config, AppDbContext dbContext)
         {
             _LazyUserRepo = new Lazy<IRepository<User>>(() => new Repository<User>(dbContext));
-            _LazyPostRepo = new Lazy<IRepository<Post>>(() => new Repository<Post>(dbContext));
+            _LazyPostRepo = new Lazy<IRepository<Post>>(() => new PostRepository(dbContext));
             _LazyCommentRepo = new Lazy<IRepository<Comment>>(() => new Repository<Comment>(dbContext));
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));

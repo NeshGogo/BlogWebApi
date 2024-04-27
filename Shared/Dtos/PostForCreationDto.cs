@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Dtos
 {
@@ -11,6 +7,7 @@ namespace Shared.Dtos
     {
         [MaxLength(150), Required]
         public string? Description { get; set; }
-        public ICollection<PostAttachmentForCreationDto> PostAttachments { get; set; }
+        [Required]
+        public ICollection<IFormFile> Files { get; set; }
     }
 }

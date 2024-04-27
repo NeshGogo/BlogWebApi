@@ -192,6 +192,7 @@ namespace Services
                 new Claim("UserName", _user.UserName),
                 new Claim(ClaimTypes.Email, _user.Email),
                 new Claim(ClaimTypes.Name, _user.Name),
+                new Claim("Id", _user.Id.ToString()),
             };
 
             if (_userManager.SupportsUserRole)

@@ -6,7 +6,7 @@ namespace Domain.Repositories
     {
         IRepository<User> UserRepo { get; }
         IPostRepository PostRepo { get; }
-        IRepository<Post> CommentRepo { get; }
+        ICommentRepository CommentRepo { get; }
         IUnitOfWork UnitOfWork { get; }
         IEmailRepository EmailRepository { get; }
     }

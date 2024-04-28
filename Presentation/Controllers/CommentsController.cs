@@ -21,5 +21,16 @@ namespace Presentation.Controllers
         [HttpGet(), Authorize]
         public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllComments(Guid postId, CancellationToken cancellation = default)
             => (await _serviceManager.CommentService.GetAllCommentsByPost(postId, cancellation)).ToList();
+
+        [SwaggerOperation(
+            Summary = "Add comment to a post",
+            Description = "You have to be log in.",
+            Tags = ["Comments"]
+            )]
+        [HttpPost(), Authorize]
+        public async Task<ActionResult<CommentDto>> AddComment(Guid postId, [FromBody] CommentForCreationDto creationDto, CancellationToken cancellation)        
+           =>  await _serviceManager.CommentService.CreateComment(postId, creationDto, cancellation);
+        
+
     }
 }

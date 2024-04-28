@@ -10,6 +10,6 @@ namespace Services.Abstractions
     public interface ICommentService
     {
         Task<IEnumerable<CommentDto>> GetAllCommentsByPost(Guid postId, CancellationToken cancellation = default);
-        Task CreateComment(Guid postId, CommentForCreationDto creationDto, CancellationToken cancellation = default);
+        Task<CommentDto> CreateComment(Guid postId, CommentForCreationDto creationDto, CancellationToken cancellation = default);
     }
 }

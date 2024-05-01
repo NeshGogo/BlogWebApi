@@ -5,11 +5,9 @@ namespace LoggerService
 {
     public class LoggerManager : ILoggerManager
     {
-        private static ILogger logger = LoggerManager.logger;
-
-        public void LogDebug(string message) => logger.Debug(message);
-        public void LogError(string message) => logger.Error(message);  
-        public void LogInfo(string message) => logger.Information(message);
-        public void LogWarning(string message) => logger.Warning(message);
+        public void LogDebug(string message) => Log.Debug(message);
+        public void LogError(string message) => Log.Error(message);  
+        public void LogInfo(string message) => Log.Information(message);
+        public void LogWarning(string message) => Log.Warning(message);
     }
 }

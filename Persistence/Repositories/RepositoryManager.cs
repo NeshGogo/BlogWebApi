@@ -1,5 +1,8 @@
-﻿using Domain.Entities;
+﻿using Azure.Storage.Blobs;
+using Contracts;
+using Domain.Entities;
 using Domain.Repositories;
+using Domain.Storages;
 using Microsoft.Extensions.Configuration;
 
 namespace Persistence.Repositories
@@ -11,14 +14,20 @@ namespace Persistence.Repositories
         private readonly Lazy<ICommentRepository> _LazyCommentRepo;
         private readonly Lazy<IUnitOfWork> _LazyUnitOfWork;
         private readonly Lazy<IEmailRepository> _LazyEmailRepo;
+        private readonly Lazy<IFileStorage> _LazyFileStorageAzureRepo;
 
-        public RepositoryManager(IConfiguration config, AppDbContext dbContext)
+        public RepositoryManager(
+            IConfiguration config, 
+            AppDbContext dbContext, 
+            BlobServiceClient blobServiceClient, 
+            ILoggerManager loggerManager)
         {
             _LazyUserRepo = new Lazy<IRepository<User>>(() => new Repository<User>(dbContext));
             _LazyPostRepo = new Lazy<IPostRepository>(() => new PostRepository(dbContext));
             _LazyCommentRepo = new Lazy<ICommentRepository>(() => new CommentRepository(dbContext));
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));
+            _LazyFileStorageAzureRepo = new Lazy<IFileStorage>(() => new FileStorageAzureRepository(blobServiceClient, loggerManager));
         }
 
         public IRepository<User> UserRepo => _LazyUserRepo.Value;
@@ -29,5 +38,7 @@ namespace Persistence.Repositories
 
         public IUnitOfWork UnitOfWork => _LazyUnitOfWork.Value;
         public IEmailRepository EmailRepository => _LazyEmailRepo.Value;
+
+        public IFileStorage FileStorage => _LazyFileStorageAzureRepo.Value;
     }
 }

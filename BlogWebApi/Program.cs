@@ -16,6 +16,7 @@ using Services.Abstractions;
 using System.Text;
 using Serilog.Sinks.Seq;
 using Serilog.Events;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,9 @@ builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 // --> Logger service
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddSerilog();
+
+// --> Azure storage
+builder.Services.AddSingleton(p => new BlobServiceClient(builder.Configuration["ConnectionStrings:StorageAccount"]));
 
 
 builder.Services.AddControllers();

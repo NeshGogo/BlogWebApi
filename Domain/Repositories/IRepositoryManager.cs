@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Storages;
 
 namespace Domain.Repositories
 {
@@ -9,5 +10,6 @@ namespace Domain.Repositories
         ICommentRepository CommentRepo { get; }
         IUnitOfWork UnitOfWork { get; }
         IEmailRepository EmailRepository { get; }
+        IFileStorage FileStorage { get; }
     }
 }

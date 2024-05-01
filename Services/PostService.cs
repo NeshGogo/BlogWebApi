@@ -1,10 +1,12 @@
 ﻿using Domain.Entities;
-using Domain.Repositories;
 using Domain.Exceptions.Post;
+using Domain.Repositories;
+using Domain.Storages;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Services.Abstractions;
 using Shared.Dtos;
+using System.ComponentModel;
 using System.Security.Claims;
 
 namespace Services
@@ -13,6 +15,7 @@ namespace Services
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ClaimsPrincipal _loggedInUser;
+        private readonly string container = "Posts";
 
         public PostService(IHttpContextAccessor contextAccessor, IRepositoryManager repositoryManager)
         {
@@ -25,15 +28,30 @@ namespace Services
             var post = postCreateDto.Adapt<Post>();
             var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
             post.UserId = userId;
-            post.PostAttachments = postCreateDto.Files.Select(file => new PostAttachment()
+
+            post.PostAttachments =  postCreateDto.Files.Select(file =>
             {
-                Name = file.Name,
-                Url = file.FileName, // ToDo: Add service to file storage
-                ContentType = file.ContentType,
-                CreatedDate = DateTime.UtcNow,
-                Updated = DateTime.UtcNow,
-                CreatedBy = userEmail,
-                UpdatedBy = userEmail,
+                var postAttch = new PostAttachment()
+                {
+                    Name = file.Name,
+                    ContentType = file.ContentType,
+                    CreatedDate = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                    CreatedBy = userEmail,
+                    UpdatedBy = userEmail,
+                };
+                using (var ms = new MemoryStream())
+                {
+                    file.CopyToAsync(ms);                   
+                    var content = ms.ToArray();
+                    var extension = Path.GetExtension(file.FileName);
+                    postAttch.Url =  _repositoryManager.FileStorage
+                        .SaveFileAsync(content, extension, container, file.ContentType)
+                        .GetAwaiter()
+                        .GetResult();
+                };
+
+                return postAttch;
             }).ToList();
             post.CreatedDate = DateTime.UtcNow;
             post.Updated = DateTime.UtcNow;
@@ -66,10 +84,10 @@ namespace Services
         public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default)
         {
             var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
-            
+
             if (post is null)
                 throw new PostNotFoundException(postId);
-           
+
             return post.Adapt<PostDto>();
         }
 
@@ -88,7 +106,7 @@ namespace Services
         public async Task UpdatePostAsync(Guid postId, PostForUpdateDto updateDto, CancellationToken cancellationToken = default)
         {
             var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
-            
+
             if (post is null)
                 throw new PostNotFoundException(postId);
 

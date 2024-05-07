@@ -16,9 +16,10 @@ namespace Persistence.Repositories
             _blobServiceClient = blobServiceClient;
         }
 
-        public Task<string> EditFileAsync(byte[] content, string extension, string container, string route, string contentType, CancellationToken cancellation = default)
+        public async Task<string> EditFileAsync(byte[] content, string extension, string container, string route, string contentType, CancellationToken cancellation = default)
         {
-            throw new NotImplementedException();
+            await RemoveFileAsync(container, route, cancellation);
+            return await SaveFileAsync(content, extension, container, contentType, cancellation);
         }
 
         public async Task RemoveFileAsync(string container, string route, CancellationToken cancellation = default)

@@ -21,9 +21,16 @@ namespace Persistence.Repositories
             throw new NotImplementedException();
         }
 
-        public Task RemoveFileAsync(string container, string route, CancellationToken cancellation = default)
+        public async Task RemoveFileAsync(string container, string route, CancellationToken cancellation = default)
         {
-            throw new NotImplementedException();
+            _loggerManager.LogInfo("--> Removing file to azure storage....");
+
+            var containerClient = _blobServiceClient.GetBlobContainerClient(container.ToLower());
+
+            var blobName = Path.GetFileName(route);
+            await containerClient.DeleteBlobIfExistsAsync(blobName, cancellationToken: cancellation);
+
+            _loggerManager.LogInfo($"--> File {blobName} removed to azure storage successfully!");
         }
 
         public async Task<string> SaveFileAsync(byte[] content, string extension, string container, string contentType, CancellationToken cancellation = default)

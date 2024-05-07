@@ -79,6 +79,11 @@ namespace Services
 
             _repositoryManager.PostRepo.Remove(post);
             await _repositoryManager.UnitOfWork.SaveChangesAsync();
+
+            foreach (var attch in post.PostAttachments)
+            {
+               await _repositoryManager.FileStorage.RemoveFileAsync(container, attch.Url, cancellationToken); 
+            }
         }
 
         public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default)

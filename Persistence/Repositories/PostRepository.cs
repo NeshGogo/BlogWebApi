@@ -21,7 +21,9 @@ namespace Persistence.Repositories
                     .Where(p => p.UserId == UserId).ToListAsync(cancellationToken);
 
         public async Task<Post> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-            => await _context.Set<Post>().Include(p => p.PostAttachments)
+            => await _context.Set<Post>()
+                    .Include(p => p.PostAttachments)
+                    .Include(p => p.PostLikes)
                     .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 }

@@ -4,6 +4,7 @@ using Domain.Repositories;
 using Domain.Storages;
 using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Services.Abstractions;
 using Shared.Dtos;
 using System.ComponentModel;
@@ -21,6 +22,38 @@ namespace Services
         {
             _repositoryManager = repositoryManager;
             _loggedInUser = contextAccessor.HttpContext.User;
+        }
+
+        public async Task AddOrRemovePostLikeAsync(Guid postId, CancellationToken cancellationToken = default)
+        {
+            var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
+
+            if (post is null)
+                throw new PostNotFoundException(postId);
+
+            var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+
+            var postLike = post.PostLikes.FirstOrDefault(p => p.UserId == userId);
+            if (postLike is null)
+            {
+                var like = new PostLike
+                {
+                    PostId = postId,
+                    UserId = userId,
+                    CreatedDate = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                    CreatedBy = userEmail,
+                    UpdatedBy = userEmail,
+                };
+                _repositoryManager.PostLikeRepo.Insert(like);
+            }
+            else
+            {
+                _repositoryManager.PostLikeRepo.Remove(postLike);
+            }
+
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();           
         }
 
         public async Task<PostDto> CreatePostAsync(Guid userId, PostForCreationDto postCreateDto, CancellationToken cancellationToken = default)

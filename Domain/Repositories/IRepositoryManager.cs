@@ -11,5 +11,6 @@ namespace Domain.Repositories
         IUnitOfWork UnitOfWork { get; }
         IEmailRepository EmailRepository { get; }
         IFileStorage FileStorage { get; }
+        IRepository<PostLike> PostLikeRepo { get; }
     }
 }

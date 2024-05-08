@@ -15,6 +15,7 @@ namespace Persistence.Repositories
         private readonly Lazy<IUnitOfWork> _LazyUnitOfWork;
         private readonly Lazy<IEmailRepository> _LazyEmailRepo;
         private readonly Lazy<IFileStorage> _LazyFileStorageAzureRepo;
+        private readonly Lazy<IRepository<PostLike>> _LazyPostLikeRepo;
 
         public RepositoryManager(
             IConfiguration config, 
@@ -28,6 +29,7 @@ namespace Persistence.Repositories
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));
             _LazyFileStorageAzureRepo = new Lazy<IFileStorage>(() => new FileStorageAzureRepository(blobServiceClient, loggerManager));
+            _LazyPostLikeRepo = new Lazy<IRepository<PostLike>>(() => new Repository<PostLike>(dbContext));
         }
 
         public IRepository<User> UserRepo => _LazyUserRepo.Value;
@@ -40,5 +42,7 @@ namespace Persistence.Repositories
         public IEmailRepository EmailRepository => _LazyEmailRepo.Value;
 
         public IFileStorage FileStorage => _LazyFileStorageAzureRepo.Value;
+
+        public IRepository<PostLike> PostLikeRepo => _LazyPostLikeRepo.Value;
     }
 }

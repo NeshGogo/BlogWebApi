@@ -66,6 +66,18 @@ namespace Presentation.Controllers
         }
 
         [SwaggerOperation(
+           Summary = "Add or remove like to a post",
+           Description = "You have to be log in.",
+           Tags = ["Posts"]
+           )]
+        [HttpPatch("{id:guid}/Likes"), Authorize]
+        public async Task<IActionResult> AddOrRemoveLike(Guid id, CancellationToken cancellation)
+        {
+            await _serviceManager.PostService.AddOrRemovePostLikeAsync(id, cancellation);
+            return NoContent();
+        }
+
+        [SwaggerOperation(
            Summary = "Delete a post",
            Description = "You have to be log in.",
            Tags = ["Posts"]

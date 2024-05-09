@@ -11,5 +11,6 @@ namespace Services.Abstractions
         IUserService UserService { get; }
         IPostService PostService { get; }
         ICommentService CommentService { get; }
+        IFollowService followService { get; }
     }
 }

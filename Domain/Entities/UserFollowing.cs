@@ -2,7 +2,7 @@
 
 namespace Domain.Entities
 {
-    public class UserFollowing : EntityBase
+    public class UserFollowing
     {
         public Guid UserId { get; set; }
         public Guid FollowingUserId { get; set; }

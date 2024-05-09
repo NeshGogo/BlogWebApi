@@ -12,5 +12,6 @@ namespace Domain.Repositories
         IEmailRepository EmailRepository { get; }
         IFileStorage FileStorage { get; }
         IRepository<PostLike> PostLikeRepo { get; }
+        IRepository<UserFollowing> UserFollowingRepo { get; }
     }
 }

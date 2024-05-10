@@ -16,6 +16,15 @@ namespace Presentation.Controllers
         public FollowsController(IServiceManager serviceManager) => _serviceManager = serviceManager;
 
         [SwaggerOperation(
+            Summary = "Get a following by user",
+            Description = "You have to be log in.",
+            Tags = ["Follows"]
+            )]
+        [HttpGet("Following"), Authorize]
+        public async Task<ActionResult<IEnumerable<UserFollowingDto>>> GetFollowing(CancellationToken cancellation)
+            => (await _serviceManager.followService.GetUserFollowingAsync(cancellation)).ToList();
+
+        [SwaggerOperation(
             Summary = "Register a following user",
             Description = "You have to be log in.",
             Tags = ["Follows"]

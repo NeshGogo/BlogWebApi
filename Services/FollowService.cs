@@ -38,9 +38,9 @@ namespace Services
             if (exists)
                 throw new UserAlreadyFollowException(userToFollowId);
 
-            var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;            
+            var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
 
-            var userFollowing = new UserFollowing() 
+            var userFollowing = new UserFollowing()
             {
                 UserId = userId,
                 FollowingUserId = userToFollowId,
@@ -54,6 +54,22 @@ namespace Services
             await _repositoryManager.UnitOfWork.SaveChangesAsync();
 
             return userFollowing.Adapt<UserFollowingDto>();
+        }
+
+        public async Task<IEnumerable<UserFollowingDto>> GetUserFollowingAsync(CancellationToken cancellationToken = default)
+        {
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+
+            var followings = await _repositoryManager.UserFollowingRepo.GetAllAsync(cancellationToken);
+
+            return followings.Where(p => p.UserId == userId)
+                .Select(p =>
+                {
+                    var result = p.Adapt<UserFollowingDto>();
+                    result.FollowingUser = _repositoryManager.UserRepo.GetByIdAsync(p.FollowingUserId, cancellationToken)
+                    .GetAwaiter().GetResult().Adapt<UserForBasicInfoDto>();
+                    return result;
+                });
         }
     }
 }

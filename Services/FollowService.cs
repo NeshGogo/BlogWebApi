@@ -53,7 +53,7 @@ namespace Services
             _repositoryManager.UserFollowingRepo.Insert(userFollowing);
             await _repositoryManager.UnitOfWork.SaveChangesAsync();
 
-            return userToFollowId.Adapt<UserFollowingDto>();
+            return userFollowing.Adapt<UserFollowingDto>();
         }
     }
 }

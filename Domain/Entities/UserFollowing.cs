@@ -13,8 +13,6 @@ namespace Domain.Entities
         [MaxLength(200)]
         public string? UpdatedBy { get; set; }
 
-
         public User User { get; set; }
-        public User FollowingUser { get; set; }
     }
 }

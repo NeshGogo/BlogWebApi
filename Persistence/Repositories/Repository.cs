@@ -30,6 +30,9 @@ namespace Persistence.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
             => await Entities.AsNoTracking().ToListAsync(cancellationToken);
+        
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T,bool>> predicate, CancellationToken cancellationToken = default)
+            => await Entities.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
 
 
         public async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

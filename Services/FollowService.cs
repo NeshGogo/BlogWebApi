@@ -56,14 +56,30 @@ namespace Services
             return userFollowing.Adapt<UserFollowingDto>();
         }
 
+        public async Task DeleteFollowingUserAsync(Guid followUserId, CancellationToken cancellationToken = default)
+        {
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+            var followingUsers = await _repositoryManager.UserFollowingRepo.GetAllAsync(p =>
+                p.UserId == userId && p.FollowingUserId == followUserId,
+                cancellationToken);
+
+            var user = followingUsers.FirstOrDefault();
+
+            if (user is null)
+                throw new UserNotFoundException(followUserId);
+
+            _repositoryManager.UserFollowingRepo.Remove(user);
+
+            await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<UserFollowingDto>> GetUserFollowingAsync(CancellationToken cancellationToken = default)
         {
             Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
 
-            var followings = await _repositoryManager.UserFollowingRepo.GetAllAsync(cancellationToken);
+            var followings = await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken);
 
-            return followings.Where(p => p.UserId == userId)
-                .Select(p =>
+            return followings.Select(p =>
                 {
                     var result = p.Adapt<UserFollowingDto>();
                     result.FollowingUser = _repositoryManager.UserRepo.GetByIdAsync(p.FollowingUserId, cancellationToken)

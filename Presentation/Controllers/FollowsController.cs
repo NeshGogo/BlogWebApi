@@ -33,5 +33,16 @@ namespace Presentation.Controllers
         public async Task<ActionResult<UserFollowingDto>> AddFollowing([FromBody] UserFollowingForCreation createDto, CancellationToken cancellation)
             => await _serviceManager.followService.CreateFollowingUserAsync(createDto.FollowingUserId, cancellation);
 
+        [SwaggerOperation(
+           Summary = "Delete a following user",
+           Description = "You have to be log in.",
+           Tags = ["Follows"]
+           )]
+        [HttpDelete("Unfllow/{followUserId:guid}"), Authorize]
+        public async Task<IActionResult> RemoveFollowing(Guid followUserId, CancellationToken cancellation)
+        { 
+            await _serviceManager.followService.DeleteFollowingUserAsync(followUserId, cancellation);
+            return NoContent();
+        }
     }
 }

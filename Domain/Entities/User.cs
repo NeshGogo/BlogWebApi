@@ -17,7 +17,6 @@ namespace Domain.Entities
         public string UpdatedBy { get; set; }
 
         public string? UserImageUrl { get; set; }
-        public ICollection<UserFollower> UserFollowers { get; set; }
         public ICollection<UserFollowing> UserFollowings { get; set; }
         public ICollection<Post> Posts { get; set; }
 

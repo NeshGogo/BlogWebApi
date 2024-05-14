@@ -21,8 +21,9 @@ namespace Presentation.Controllers
             Tags = ["Follows"]
             )]
         [HttpGet("Following"), Authorize]
-        public async Task<ActionResult<IEnumerable<UserFollowingDto>>> GetFollowing(CancellationToken cancellation)
-            => (await _serviceManager.followService.GetUserFollowingAsync(cancellation)).ToList();
+        public async Task<ActionResult<IEnumerable<UserFollowingDto>>> GetFollowing([FromQuery] bool following = true, 
+                CancellationToken cancellation = default)
+            => (await _serviceManager.followService.GetUserFollowingAsync(following, cancellation)).ToList();
 
         [SwaggerOperation(
             Summary = "Register a following user",

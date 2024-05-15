@@ -39,10 +39,22 @@ namespace Presentation.Controllers
            Description = "You have to be log in.",
            Tags = ["Follows"]
            )]
-        [HttpDelete("Unfllow/{followUserId:guid}"), Authorize]
+        [HttpDelete("Unfollow/{followUserId:guid}"), Authorize]
         public async Task<IActionResult> RemoveFollowing(Guid followUserId, CancellationToken cancellation)
         { 
             await _serviceManager.followService.DeleteFollowingUserAsync(followUserId, cancellation);
+            return NoContent();
+        }
+
+        [SwaggerOperation(
+           Summary = "Delete a follower",
+           Description = "You have to be log in.",
+           Tags = ["Follows"]
+           )]
+        [HttpDelete("Follower/{followerUserId:guid}"), Authorize]
+        public async Task<IActionResult> RemoveFollower(Guid followerUserId, CancellationToken cancellation)
+        {
+            await _serviceManager.followService.DeleteFollowingUserAsync(followerUserId, true, cancellation);
             return NoContent();
         }
     }

@@ -6,6 +6,6 @@ namespace Services.Abstractions
     {
         Task<IEnumerable<UserFollowingDto>> GetUserFollowingAsync(bool following = true, CancellationToken cancellationToken = default);
         Task<UserFollowingDto> CreateFollowingUserAsync(Guid userToFollowId, CancellationToken cancellationToken = default);
-        Task DeleteFollowingUserAsync(Guid followUserId, CancellationToken cancellationToken = default);
+        Task DeleteFollowingUserAsync(Guid userId, bool isFollower = false, CancellationToken cancellationToken = default);
     }
 }

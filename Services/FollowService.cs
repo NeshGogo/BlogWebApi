@@ -56,12 +56,14 @@ namespace Services
             return userFollowing.Adapt<UserFollowingDto>();
         }
 
-        public async Task DeleteFollowingUserAsync(Guid followUserId, CancellationToken cancellationToken = default)
+        public async Task DeleteFollowingUserAsync(Guid followUserId, bool isFollower = false, CancellationToken cancellationToken = default)
         {
             Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
-            var followingUsers = await _repositoryManager.UserFollowingRepo.GetAllAsync(p =>
-                p.UserId == userId && p.FollowingUserId == followUserId,
-                cancellationToken);
+            var followingUsers = isFollower 
+                ? await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == followUserId
+                        && p.FollowingUserId == userId, cancellationToken)
+                : await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId 
+                        && p.FollowingUserId == followUserId, cancellationToken);
 
             var user = followingUsers.FirstOrDefault();
 

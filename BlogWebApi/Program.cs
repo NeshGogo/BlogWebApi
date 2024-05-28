@@ -141,6 +141,8 @@ app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILogger<object>>()
 if (app.Environment.IsProduction())
     app.UseHsts();
 
+app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

@@ -42,7 +42,7 @@ namespace Presentation.Controllers
         [HttpDelete("Unfollow/{followUserId:guid}"), Authorize]
         public async Task<IActionResult> RemoveFollowing(Guid followUserId, CancellationToken cancellation)
         { 
-            await _serviceManager.followService.DeleteFollowingUserAsync(followUserId, cancellation);
+            await _serviceManager.followService.DeleteFollowingUserAsync(followUserId, false, cancellation);
             return NoContent();
         }
 

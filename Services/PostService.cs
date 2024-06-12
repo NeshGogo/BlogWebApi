@@ -129,9 +129,18 @@ namespace Services
             return post.Adapt<PostDto>();
         }
 
-        public async Task<IEnumerable<PostDto>> GetPostsAllPost(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PostDto>> GetPostsAllPost(bool following = false, CancellationToken cancellationToken = default)
         {
             var posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
+            
+            if (following)
+            {
+                Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+                var users = await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken);
+                var usersId = users.Select(p => p.FollowingUserId);
+                posts = posts.Where(p => usersId.Any(p => p.Equals(userId)));
+            }
+
             return posts.Adapt<IEnumerable<PostDto>>();
         }
 

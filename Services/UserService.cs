@@ -152,7 +152,7 @@ namespace Services
 
         public async Task<TokenDto> RefreshTokenAsync(TokenDto tokenDto)
         {
-            var principal = GetPrincipalFromExpiredToken(tokenDto.Token);
+            var principal = GetPrincipalFromExpiredToken(tokenDto.Token, false);
             string userName = principal.FindFirst("UserName")?.Value;
             var user = await _userManager.FindByNameAsync(userName);
 
@@ -231,13 +231,13 @@ namespace Services
             }
         }
 
-        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token, bool validateLifetime = true)
         {
             var tokenValidator = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = false,
-                ValidateLifetime = true,
+                ValidateLifetime = validateLifetime,
                 ValidIssuers = [_configuration["jwt:validIssuer"]],
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(

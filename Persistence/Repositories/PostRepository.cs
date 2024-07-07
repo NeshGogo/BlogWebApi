@@ -14,7 +14,7 @@ namespace Persistence.Repositories
         }
 
         public async Task<IEnumerable<Post>> GetAllAsync(CancellationToken cancellationToken = default)
-            => await _context.Set<Post>().AsNoTracking().Include(p => p.PostAttachments)
+            => await _context.Set<Post>().AsNoTracking().Include(p => p.PostAttachments.OrderBy(p=> p.CreatedDate))
                     .Include(p => p.User).ToListAsync(cancellationToken);
         public async Task<IEnumerable<Post>> GetAllByUserIdAsync(Guid UserId, CancellationToken cancellationToken = default)
             => await _context.Set<Post>().Include(p => p.PostAttachments)

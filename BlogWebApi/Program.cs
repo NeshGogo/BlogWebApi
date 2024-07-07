@@ -17,6 +17,9 @@ using System.Text;
 using Serilog.Sinks.Seq;
 using Serilog.Events;
 using Azure.Storage.Blobs;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
+using Azure.Core.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,7 +92,10 @@ builder.Services.AddSerilog();
 builder.Services.AddSingleton(p => new BlobServiceClient(builder.Configuration["ConnectionStrings:StorageAccount"]));
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opt =>
+{
+    opt.JsonSerializerOptions.IgnoreNullValues = true;
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>

@@ -1,11 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 namespace Domain.ErrorModel
 {
     public class ErrorDetails
     {
+        [JsonPropertyName("statusCode")]
         public int StatusCode { get; set; }
+        [JsonPropertyName("message")]
         public string? Message { get; set; }
 
         /// <summary>

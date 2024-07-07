@@ -141,7 +141,7 @@ namespace Services
                 posts = posts.Where(p => usersId.Any(p => p.Equals(userId)));
             }
 
-            return posts.Adapt<IEnumerable<PostDto>>();
+            return posts.Adapt<IEnumerable<PostDto>>().OrderByDescending(p => p.CreatedDate);
         }
 
         public async Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default)

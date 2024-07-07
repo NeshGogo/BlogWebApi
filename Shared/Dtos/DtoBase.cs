@@ -9,6 +9,6 @@ namespace Shared.Dtos
     public abstract class DtoBase
     {
         public Guid Id { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

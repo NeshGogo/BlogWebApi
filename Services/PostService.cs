@@ -147,7 +147,7 @@ namespace Services
         public async Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default)
         {
             var posts = await _repositoryManager.PostRepo.GetAllByUserIdAsync(userId, cancellationToken);
-            return posts.Adapt<IEnumerable<PostDto>>();
+            return posts.Adapt<IEnumerable<PostDto>>().OrderByDescending(p => p.CreatedDate);
         }
 
         public async Task UpdatePostAsync(Guid postId, PostForUpdateDto updateDto, CancellationToken cancellationToken = default)

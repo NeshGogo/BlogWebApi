@@ -145,6 +145,7 @@ namespace Services
                 var post = posts.First(x => x.Id == p.Id);
                 p.Liked = post.PostLikes.Any(x => x.UserId == userId);
                 p.AmountOfComments = post.Comments.Count();
+                p.AmountOfLikes = post.PostLikes.Count();
                 return p;
             }).OrderByDescending(p => p.CreatedDate);
         }

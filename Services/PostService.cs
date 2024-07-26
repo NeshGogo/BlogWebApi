@@ -126,7 +126,14 @@ namespace Services
             if (post is null)
                 throw new PostNotFoundException(postId);
 
-            return post.Adapt<PostDto>();
+            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+            
+            var dto = post.Adapt<PostDto>();
+            dto.Liked = post.PostLikes.Any(x => x.UserId == userId);
+            dto.AmountOfComments = post.Comments.Count();
+            dto.AmountOfLikes = post.PostLikes.Count();
+
+            return dto;
         }
 
         public async Task<IEnumerable<PostDto>> GetPostsAllPost(bool following = false, CancellationToken cancellationToken = default)

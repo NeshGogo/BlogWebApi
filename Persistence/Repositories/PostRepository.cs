@@ -29,6 +29,7 @@ namespace Persistence.Repositories
                     .Include(p => p.PostAttachments)
                     .Include(p => p.PostLikes)
                     .Include(p => p.Comments)
+                    .Include(p => p.User)
                     .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 }

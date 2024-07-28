@@ -49,7 +49,7 @@ namespace Services
         public async Task<IEnumerable<CommentDto>> GetAllCommentsByPost(Guid postId, CancellationToken cancellation = default)
         {
             var results = await _repositoryManager.CommentRepo.GetAllByPostIdAsync(postId, cancellation);
-            return results.Adapt<IEnumerable<CommentDto>>();
+            return results.Adapt<IEnumerable<CommentDto>>().OrderByDescending(p => p.CreatedDate);
         }
     }
 }

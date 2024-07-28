@@ -24,10 +24,22 @@ namespace Presentation.Controllers
             Tags = ["Users"]
             )]
         [Authorize]
-        [HttpGet]
+        [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(CancellationToken cancellation)
         {
             return (await _serviceManager.UserService.GetAllAsync(cancellation)).ToList();
+        }
+
+        [SwaggerOperation(
+            Summary = "Get user",
+            Description = "You have to be log in.",
+            Tags = ["Users"]
+            )]
+        [Authorize]
+        [HttpGet("users/{id:guid}")]
+        public async Task<ActionResult<UserDto>> GetUser(Guid id, CancellationToken cancellation)
+        {
+            return await _serviceManager.UserService.GetByIdAsync(id, cancellation);
         }
 
         [SwaggerOperation(

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
 using Shared.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 
 namespace Presentation.Controllers
@@ -25,9 +26,15 @@ namespace Presentation.Controllers
             )]
         [Authorize]
         [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(CancellationToken cancellation)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] string? search, CancellationToken cancellation)
         {
-            return (await _serviceManager.UserService.GetAllAsync(cancellation)).ToList();
+            var result = await _serviceManager.UserService.GetAllAsync(cancellation);
+            if(search is not null)
+            {
+                string value = search.ToLower();
+                result = result.Where(val => val.Name.ToLower().Contains(value) || val.UserName.ToLower().Contains(value));
+            }
+            return result.ToList();
         }
 
         [SwaggerOperation(

@@ -21,12 +21,16 @@ namespace Presentation.Controllers
             Tags = ["Posts"]
             )]
         [HttpGet(), Authorize]
-        public async Task<ActionResult<IEnumerable<PostDto>>> GetAllPosts([FromQuery] bool me = false, [FromQuery] bool following = false, CancellationToken cancellation = default)
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetAllPosts([FromQuery] PostFilterDto filter, CancellationToken cancellation = default)
         {
             Guid.TryParse(User.FindFirst("Id").Value, out var userId);
-            var result = me 
+            var result = filter.Me
                 ? await _serviceManager.PostService.GetPostsByUserId(userId, cancellation) 
-                : await _serviceManager.PostService.GetPostsAllPost(following, cancellation);
+                : await _serviceManager.PostService.GetPostsAllPost(filter.Following, cancellation);
+            if(filter.UserId != null)
+            {
+                result = result.Where(x => x.UserId == filter.UserId);
+            }
             return result.ToList();
         }
 

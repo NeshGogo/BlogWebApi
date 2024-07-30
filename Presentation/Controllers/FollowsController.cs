@@ -20,10 +20,10 @@ namespace Presentation.Controllers
             Description = "You have to be log in.",
             Tags = ["Follows"]
             )]
-        [HttpGet("Following"), Authorize]
-        public async Task<ActionResult<IEnumerable<UserFollowingDto>>> GetFollowing([FromQuery] bool following = true, 
+        [HttpGet("Following/{userId:guid}"), Authorize]
+        public async Task<ActionResult<IEnumerable<UserFollowingDto>>> GetFollowing(Guid userId, [FromQuery] bool following = true, 
                 CancellationToken cancellation = default)
-            => (await _serviceManager.followService.GetUserFollowingAsync(following, cancellation)).ToList();
+            => (await _serviceManager.followService.GetUserFollowingAsync(userId, following, cancellation)).ToList();
 
         [SwaggerOperation(
             Summary = "Register a following user",

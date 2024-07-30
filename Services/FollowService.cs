@@ -75,10 +75,8 @@ namespace Services
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<UserFollowingDto>> GetUserFollowingAsync(bool following = true, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UserFollowingDto>> GetUserFollowingAsync(Guid userId, bool following = true, CancellationToken cancellationToken = default)
         {
-            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
-
             var followings = following 
                 ? await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken)
                 : await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.FollowingUserId == userId, cancellationToken);

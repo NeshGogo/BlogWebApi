@@ -40,7 +40,7 @@ namespace Persistence.Repositories
            
             var containerClient =  _blobServiceClient.GetBlobContainerClient(container.ToLower());
             await containerClient.CreateIfNotExistsAsync();
-
+            extension = string.IsNullOrEmpty(extension) ? ".jpg" : extension;
             var fileName = $"{Guid.NewGuid()}{extension}";
             var blobClient = containerClient.GetBlobClient(fileName);
 

@@ -95,6 +95,8 @@ namespace Services
 
             await _repositoryManager.UnitOfWork.SaveChangesAsync();
 
+            post.User = await _repositoryManager.UserRepo.GetByIdAsync(post.UserId);
+
             return post.Adapt<PostDto>();
         }
 

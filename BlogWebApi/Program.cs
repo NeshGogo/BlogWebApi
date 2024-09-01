@@ -20,6 +20,8 @@ using Azure.Storage.Blobs;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Azure.Core.Serialization;
+using Domain.ConfigurationModels;
+using Persistence.AiServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,11 @@ builder.Services.AddSerilog();
 
 // --> Azure storage
 builder.Services.AddSingleton(p => new BlobServiceClient(builder.Configuration["ConnectionStrings:StorageAccount"]));
+
+// --> OpenAI Configuration
+builder.Services.Configure<OpenAIConfiguration>(builder.Configuration.GetSection(OpenAIConfiguration.SectionName));
+builder.Services.AddScoped<IGenerativeAI, GenerativeAiService>();
+
 
 
 builder.Services.AddControllers().AddJsonOptions(opt =>

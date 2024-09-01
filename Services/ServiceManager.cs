@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Services.Abstractions;
+using Contracts;
 
 namespace Services
 {
@@ -13,19 +14,22 @@ namespace Services
         private readonly Lazy<IPostService> _lazyPostService;
         private readonly Lazy<ICommentService> _lazyCommentService;
         private readonly Lazy<IFollowService> _lazyfollowService;
+        private readonly Lazy<IGenerativeAiService> _lazyGenerativeAiService;
 
         public ServiceManager(
             IRepositoryManager repositoryManager, 
             UserManager<User> userManager, 
             SignInManager<User> signInManager, 
             IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IGenerativeAI generativeAI)
         {
            _lazyUserService = new  Lazy<IUserService>(() => new UserService(httpContextAccessor, repositoryManager,
                userManager, signInManager, configuration)); 
            _lazyPostService = new Lazy<IPostService>(() => new PostService(httpContextAccessor, repositoryManager));
            _lazyCommentService = new Lazy<ICommentService>(() => new CommentService(httpContextAccessor, repositoryManager));
             _lazyfollowService = new Lazy<IFollowService>(() => new FollowService(httpContextAccessor, repositoryManager));
+            _lazyGenerativeAiService = new Lazy<IGenerativeAiService>(() => new GenerativeAiService(generativeAI));
         } 
 
         public IUserService UserService => _lazyUserService.Value; 
@@ -33,5 +37,7 @@ namespace Services
         public ICommentService CommentService => _lazyCommentService.Value;
 
         public IFollowService followService => _lazyfollowService.Value;
+
+        public IGenerativeAiService GenerativeAiService => _lazyGenerativeAiService.Value;
     }
 }

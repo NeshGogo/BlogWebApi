@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Services.Abstractions;
 
-namespace Services.Abstractions
+public interface IServiceManager
 {
-    public interface IServiceManager
-    {
-        IUserService UserService { get; }
-        IPostService PostService { get; }
-        ICommentService CommentService { get; }
-        IFollowService followService { get; }
-    }
+    IUserService UserService { get; }
+    IPostService PostService { get; }
+    ICommentService CommentService { get; }
+    IFollowService followService { get; }
+    IGenerativeAiService GenerativeAiService { get; }
 }

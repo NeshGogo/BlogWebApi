@@ -37,9 +37,10 @@ public sealed class GenerativeAiService : IGenerativeAI
 
         var chatmessage = GetChatCompletionOptions();
 
-        var image = ChatMessageContentPart.CreateImageMessageContentPart(new BinaryData(content), contentType);
+        var image = ChatMessageContentPart.CreateImageMessageContentPart(new BinaryData(content), 
+                contentType, ImageChatMessageContentPartDetail.Low);
 
-        var response  = await chatClient.CompleteChatAsync([
+        var response =  await chatClient.CompleteChatAsync([
             new SystemChatMessage(systemBehavior),
             new UserChatMessage([
                 ChatMessageContentPart.CreateTextMessageContentPart(prompt),

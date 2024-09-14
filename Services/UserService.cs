@@ -24,6 +24,7 @@ namespace Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ClaimsPrincipal? _loggedInUser;
         private User? _user;
+        private readonly bool _isDev = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
         public UserService(
             IHttpContextAccessor httpContextAccessor,
@@ -66,6 +67,12 @@ namespace Services
             var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user); 
             var body = user.BuildConfirmEmailBody(host, emailConfirmToken);
             await _repositoryManager.EmailRepository.SendAsync([user.Email], "Email Confirmation", body, cancellation: cancellationToken);
+
+            // --> Automatically confirm user email when is in dev mode.
+            if(_isDev)
+            {
+                await ConfirmUserEmailAsync(emailConfirmToken, user.Id, cancellationToken);
+            }
 
             return user.Adapt<UserDto>();
         }

@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Contracts;
 using Domain.Entities;
-using Domain.Repositories;
 using Domain.Storages;
 using Microsoft.Extensions.Configuration;
 

@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Exceptions.User;
-using Domain.Repositories;
+using Contracts;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

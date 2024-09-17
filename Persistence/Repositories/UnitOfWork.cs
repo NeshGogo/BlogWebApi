@@ -1,4 +1,4 @@
-﻿using Domain.Repositories;
+﻿using Contracts;
 
 namespace Persistence.Repositories
 {

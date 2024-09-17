@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Exceptions.Post;
-using Domain.Repositories;
+using Contracts;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Services.Abstractions;

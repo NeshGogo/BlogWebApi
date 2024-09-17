@@ -1,4 +1,4 @@
-﻿using Domain.Repositories;
+﻿using Contracts;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;

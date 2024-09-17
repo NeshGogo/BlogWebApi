@@ -1,7 +1,6 @@
 using BlogWebApi.Extensions;
 using Contracts;
 using Domain.Entities;
-using Domain.Repositories;
 using LoggerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

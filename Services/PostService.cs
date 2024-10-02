@@ -9,6 +9,7 @@ using Services.Abstractions;
 using Shared.Dtos;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace Services
 {
@@ -140,13 +141,17 @@ namespace Services
 
         public async Task<IEnumerable<PostDto>> GetPostsAllPost(bool following = false, CancellationToken cancellationToken = default)
         {
-            var posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
+            IEnumerable<Post> posts;
             Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
+            
             if (following)
             {               
                 var users = await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken);
                 var usersId = users.Select(p => p.FollowingUserId);
-                posts = posts.Where(p => usersId.Any(p => p.Equals(userId)));
+                posts = await _repositoryManager.PostRepo.GetAllAsync(p => usersId.Any(p => p.Equals(userId)), cancellationToken);
+            } else
+            {
+                posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
             }
 
             return posts.Adapt<IEnumerable<PostDto>>().Select(p =>

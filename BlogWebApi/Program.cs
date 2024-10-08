@@ -82,6 +82,14 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
+
+// --> Redis caching config
+builder.Services.AddStackExchangeRedisCache(opt =>
+{
+    string connection = builder.Configuration.GetConnectionString("Redis");
+    opt.Configuration = connection;
+});
+
 // --> Registering the services Manager and Repository Manager
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();

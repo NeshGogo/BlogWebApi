@@ -2,6 +2,7 @@
 using Contracts;
 using Domain.Entities;
 using Domain.Storages;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Persistence.Repositories.Cached;
@@ -24,10 +25,11 @@ namespace Persistence.Repositories
             AppDbContext dbContext, 
             BlobServiceClient blobServiceClient, 
             ILoggerManager loggerManager,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            IDistributedCache distributed)
         {
             _LazyUserRepo = new Lazy<IRepository<User>>(() => new Repository<User>(dbContext));
-            _LazyPostRepo = new Lazy<IPostRepository>(() => new CachedPostRepository(new PostRepository(dbContext), memoryCache));
+            _LazyPostRepo = new Lazy<IPostRepository>(() => new CachedPostRepository(new PostRepository(dbContext), memoryCache, distributed));
             _LazyCommentRepo = new Lazy<ICommentRepository>(() => new CommentRepository(dbContext));
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));

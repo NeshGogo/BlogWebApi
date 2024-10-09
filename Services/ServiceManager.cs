@@ -21,11 +21,12 @@ namespace Services
             SignInManager<User> signInManager, 
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
-            IGenerativeAI generativeAI)
+            IGenerativeAI generativeAI,
+            ICachingService cachingService)
         {
            _lazyUserService = new  Lazy<IUserService>(() => new UserService(httpContextAccessor, repositoryManager,
                userManager, signInManager, configuration)); 
-           _lazyPostService = new Lazy<IPostService>(() => new PostService(httpContextAccessor, repositoryManager));
+           _lazyPostService = new Lazy<IPostService>(() => new PostService(httpContextAccessor, repositoryManager, cachingService));
            _lazyCommentService = new Lazy<ICommentService>(() => new CommentService(httpContextAccessor, repositoryManager));
             _lazyfollowService = new Lazy<IFollowService>(() => new FollowService(httpContextAccessor, repositoryManager));
             _lazyGenerativeAiService = new Lazy<IGenerativeAiService>(() => new GenerativeAiService(generativeAI));

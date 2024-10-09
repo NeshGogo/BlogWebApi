@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Azure.Core.Serialization;
 using Domain.ConfigurationModels;
 using Persistence.AiServices;
+using Persistence.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,6 +90,7 @@ builder.Services.AddStackExchangeRedisCache(opt =>
     string connection = builder.Configuration.GetConnectionString("Redis");
     opt.Configuration = connection;
 });
+builder.Services.AddSingleton<ICachingService, CachingService>();
 
 // --> Registering the services Manager and Repository Manager
 builder.Services.AddScoped<IServiceManager, ServiceManager>();

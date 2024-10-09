@@ -1,15 +1,11 @@
-﻿using Domain.Entities;
+﻿using Contracts;
+using Domain.Entities;
 using Domain.Exceptions.Post;
-using Contracts;
-using Domain.Storages;
 using Mapster;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using Services.Abstractions;
 using Shared.Dtos;
-using System.ComponentModel;
 using System.Security.Claims;
-using System.Collections.Generic;
 
 namespace Services
 {
@@ -18,11 +14,13 @@ namespace Services
         private readonly IRepositoryManager _repositoryManager;
         private readonly ClaimsPrincipal _loggedInUser;
         private readonly string container = "Posts";
+        private readonly ICachingService _cachingService;
 
-        public PostService(IHttpContextAccessor contextAccessor, IRepositoryManager repositoryManager)
+        public PostService(IHttpContextAccessor contextAccessor, IRepositoryManager repositoryManager, ICachingService cachingService)
         {
             _repositoryManager = repositoryManager;
             _loggedInUser = contextAccessor.HttpContext.User;
+            _cachingService = cachingService;
         }
 
         public async Task AddOrRemovePostLikeAsync(Guid postId, CancellationToken cancellationToken = default)
@@ -54,7 +52,9 @@ namespace Services
                 _repositoryManager.PostLikeRepo.Remove(postLike);
             }
 
-            await _repositoryManager.UnitOfWork.SaveChangesAsync();           
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
+
+            await _cachingService.RemoveByPrefixAsync("posts", cancellationToken);
         }
 
         public async Task<PostDto> CreatePostAsync(Guid userId, PostForCreationDto postCreateDto, CancellationToken cancellationToken = default)
@@ -63,7 +63,7 @@ namespace Services
             var userEmail = _loggedInUser.FindFirst(ClaimTypes.Email).Value;
             post.UserId = userId;
 
-            post.PostAttachments =  postCreateDto.Files.Select(file =>
+            post.PostAttachments = postCreateDto.Files.Select(file =>
             {
                 var postAttch = new PostAttachment()
                 {
@@ -76,10 +76,10 @@ namespace Services
                 };
                 using (var ms = new MemoryStream())
                 {
-                    file.CopyToAsync(ms);                   
+                    file.CopyToAsync(ms);
                     var content = ms.ToArray();
                     var extension = Path.GetExtension(file.FileName);
-                    postAttch.Url =  _repositoryManager.FileStorage
+                    postAttch.Url = _repositoryManager.FileStorage
                         .SaveFileAsync(content, extension, container, file.ContentType)
                         .GetAwaiter()
                         .GetResult();
@@ -97,6 +97,8 @@ namespace Services
             await _repositoryManager.UnitOfWork.SaveChangesAsync();
 
             post.User = await _repositoryManager.UserRepo.GetByIdAsync(post.UserId);
+
+            await _cachingService.RemoveByPrefixAsync("posts", cancellationToken);
 
             return post.Adapt<PostDto>();
         }
@@ -118,57 +120,75 @@ namespace Services
 
             foreach (var attch in post.PostAttachments)
             {
-               await _repositoryManager.FileStorage.RemoveFileAsync(container, attch.Url, cancellationToken); 
+                await _repositoryManager.FileStorage.RemoveFileAsync(container, attch.Url, cancellationToken);
             }
+
+            await _cachingService.RemoveByPrefixAsync("posts", cancellationToken);
         }
 
-        public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default)
-        {
-            var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
+        public async Task<PostDto> GetPostByAsync(Guid postId, CancellationToken cancellationToken = default) =>
+            await _cachingService.GetAsync<PostDto>(
+                $"Posts-{postId}",
+                async () =>
+                {
+                    var post = await _repositoryManager.PostRepo.GetByIdAsync(postId, cancellationToken);
 
-            if (post is null)
-                throw new PostNotFoundException(postId);
+                    if (post is null)
+                        throw new PostNotFoundException(postId);
 
-            Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
-            
-            var dto = post.Adapt<PostDto>();
-            dto.Liked = post.PostLikes.Any(x => x.UserId == userId);
-            dto.AmountOfComments = post.Comments.Count();
-            dto.AmountOfLikes = post.PostLikes.Count();
+                    Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
 
-            return dto;
-        }
+                    var dto = post.Adapt<PostDto>();
+                    dto.Liked = post.PostLikes.Any(x => x.UserId == userId);
+                    dto.AmountOfComments = post.Comments.Count();
+                    dto.AmountOfLikes = post.PostLikes.Count();
+
+                    return dto;
+                });
 
         public async Task<IEnumerable<PostDto>> GetPostsAllPost(bool following = false, CancellationToken cancellationToken = default)
         {
-            IEnumerable<Post> posts;
             Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
-            
-            if (following)
-            {               
-                var users = await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken);
-                var usersId = users.Select(p => p.FollowingUserId);
-                posts = await _repositoryManager.PostRepo.GetAllAsync(p => usersId.Any(p => p.Equals(userId)), cancellationToken);
-            } else
-            {
-                posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
-            }
 
-            return posts.Adapt<IEnumerable<PostDto>>().Select(p =>
-            {
-                var post = posts.First(x => x.Id == p.Id);
-                p.Liked = post.PostLikes.Any(x => x.UserId == userId);
-                p.AmountOfComments = post.Comments.Count();
-                p.AmountOfLikes = post.PostLikes.Count();
-                return p;
-            }).OrderByDescending(p => p.CreatedDate);
+            return await _cachingService.GetAsync(
+                following ? $"Posts?following={following}&userId={userId}" : $"Posts?following={following}",
+                async () =>
+                {
+                    IEnumerable<Post> posts;
+
+                    if (following)
+                    {
+                        var users = await _repositoryManager.UserFollowingRepo.GetAllAsync(p => p.UserId == userId, cancellationToken);
+                        var usersId = users.Select(p => p.FollowingUserId);
+                        posts = await _repositoryManager.PostRepo.GetAllAsync(p => usersId.Any(p => p.Equals(userId)), cancellationToken);
+                    }
+                    else
+                    {
+                        posts = await _repositoryManager.PostRepo.GetAllAsync(cancellationToken);
+                    }
+
+                    return posts.Adapt<IEnumerable<PostDto>>().Select(p =>
+                    {
+                        var post = posts.First(x => x.Id == p.Id);
+                        p.Liked = post.PostLikes.Any(x => x.UserId == userId);
+                        p.AmountOfComments = post.Comments.Count();
+                        p.AmountOfLikes = post.PostLikes.Count();
+                        return p;
+                    }).OrderByDescending(p => p.CreatedDate);
+                },
+                cancellationToken);
         }
 
-        public async Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default)
-        {
-            var posts = await _repositoryManager.PostRepo.GetAllByUserIdAsync(userId, cancellationToken);
-            return posts.Adapt<IEnumerable<PostDto>>().OrderByDescending(p => p.CreatedDate);
-        }
+        public async Task<IEnumerable<PostDto>> GetPostsByUserId(Guid userId, CancellationToken cancellationToken = default) =>
+            await _cachingService.GetAsync<IEnumerable<PostDto>>(
+                $"Posts-userId={userId}",
+                async () =>
+                {
+                    var posts = await _repositoryManager.PostRepo.GetAllByUserIdAsync(userId, cancellationToken);
+                    return posts.Adapt<IEnumerable<PostDto>>().OrderByDescending(p => p.CreatedDate);
+                },
+                cancellationToken);
+
 
         public async Task UpdatePostAsync(Guid postId, PostForUpdateDto updateDto, CancellationToken cancellationToken = default)
         {
@@ -188,6 +208,8 @@ namespace Services
             post.Description = updateDto.Description;
 
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _cachingService.RemoveByPrefixAsync("Posts");
         }
     }
 }

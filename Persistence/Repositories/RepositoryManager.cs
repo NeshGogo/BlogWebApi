@@ -25,11 +25,10 @@ namespace Persistence.Repositories
             AppDbContext dbContext, 
             BlobServiceClient blobServiceClient, 
             ILoggerManager loggerManager,
-            IMemoryCache memoryCache,
-            IDistributedCache distributed)
+            IMemoryCache memoryCache)
         {
             _LazyUserRepo = new Lazy<IRepository<User>>(() => new Repository<User>(dbContext));
-            _LazyPostRepo = new Lazy<IPostRepository>(() => new CachedPostRepository(new PostRepository(dbContext), memoryCache, distributed));
+            _LazyPostRepo = new Lazy<IPostRepository>(() => new PostRepository(dbContext));
             _LazyCommentRepo = new Lazy<ICommentRepository>(() => new CommentRepository(dbContext));
             _LazyUnitOfWork = new Lazy<IUnitOfWork>(() => new UnitOfWork(dbContext));
             _LazyEmailRepo = new Lazy<IEmailRepository>(() => new EmailRepository(config));

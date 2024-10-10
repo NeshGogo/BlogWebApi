@@ -1,6 +1,5 @@
 ﻿using Contracts;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,9 +8,21 @@ namespace Persistence.Caching
     public sealed class CachingService : ICachingService
     {
         private readonly IDistributedCache _distributedCache;
-        private static readonly Dictionary<string, bool> CachedKeys = new();
+        private readonly Dictionary<string, bool> CachedKeys;
+        private const string KeyOfCachedKeys = "CachedKeys";
 
-        public CachingService(IDistributedCache disposableCache) => _distributedCache = disposableCache;
+        public CachingService(IDistributedCache distributedCache)
+        {
+            _distributedCache = distributedCache;
+
+            var cachedKeys = _distributedCache.GetString(KeyOfCachedKeys);
+
+            CachedKeys = cachedKeys is not null
+                ? JsonSerializer.Deserialize<Dictionary<string, bool>>(cachedKeys)
+                : new();
+
+            _distributedCache.SetString(KeyOfCachedKeys, JsonSerializer.Serialize(CachedKeys));
+        }
 
         public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
         {
@@ -46,22 +57,42 @@ namespace Persistence.Caching
 
             await _distributedCache.SetStringAsync(key, jsonValue, cancellationToken);
 
-            CachedKeys.Add(key, true);
+            await AddKey(key, cancellationToken);
         }
 
         public async Task RemoveAsync(string key, CancellationToken cancellation = default)
         {
             await _distributedCache.RemoveAsync(key, cancellation);
-            CachedKeys.Remove(key);
+            await RemoveKey(key, cancellation);
         }
 
         public async Task RemoveByPrefixAsync(string prefix, CancellationToken cancellation = default)
         {
             var tasks = CachedKeys.Keys
-                .Where(p => p.StartsWith(prefix))
+                .Where(p => p.ToLower().StartsWith(prefix.ToLower()))
                 .Select(key => RemoveAsync(key, cancellation));
 
             await Task.WhenAll(tasks);
+        }
+
+        private async Task AddKeyAsync(string key, CancellationToken cancellation = default)
+        {
+            CachedKeys.Add(key, true);
+            await _distributedCache.RemoveAsync(KeyOfCachedKeys, cancellation);
+            await _distributedCache.SetStringAsync(
+                KeyOfCachedKeys,
+                JsonSerializer.Serialize(CachedKeys),
+                cancellation);
+        }
+
+        private async Task RemoveKeyAsync(string key, CancellationToken cancellation = default)
+        {
+            CachedKeys.Remove(key);
+            await _distributedCache.RemoveAsync(KeyOfCachedKeys, cancellation);
+            await _distributedCache.SetStringAsync(
+                    KeyOfCachedKeys,
+                    JsonSerializer.Serialize(CachedKeys),
+                    cancellation);
         }
     }
 }

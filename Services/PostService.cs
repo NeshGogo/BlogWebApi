@@ -150,7 +150,7 @@ namespace Services
         {
             Guid.TryParse(_loggedInUser.FindFirst("Id").Value, out var userId);
 
-            return await _cachingService.GetAsync(
+            return await _cachingService.GetAsync<IEnumerable<PostDto>>(
                 following ? $"Posts?following={following}&userId={userId}" : $"Posts?following={following}",
                 async () =>
                 {

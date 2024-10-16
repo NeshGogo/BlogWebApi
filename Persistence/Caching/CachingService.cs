@@ -57,13 +57,13 @@ namespace Persistence.Caching
 
             await _distributedCache.SetStringAsync(key, jsonValue, cancellationToken);
 
-            await AddKey(key, cancellationToken);
+            await AddKeyAsync(key, cancellationToken);
         }
 
         public async Task RemoveAsync(string key, CancellationToken cancellation = default)
         {
             await _distributedCache.RemoveAsync(key, cancellation);
-            await RemoveKey(key, cancellation);
+            await RemoveKeyAsync(key, cancellation);
         }
 
         public async Task RemoveByPrefixAsync(string prefix, CancellationToken cancellation = default)

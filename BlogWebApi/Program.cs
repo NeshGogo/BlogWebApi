@@ -1,147 +1,40 @@
 using BlogWebApi.Extensions;
-using Contracts;
-using Domain.Entities;
-using LoggerService;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Persistence;
-using Persistence.Repositories;
 using Serilog;
-using Services;
-using Services.Abstractions;
-using System.Text;
-using Serilog.Sinks.Seq;
-using Serilog.Events;
-using Azure.Storage.Blobs;
-using System.Text.Json.Serialization;
-using Microsoft.Extensions.Options;
-using Azure.Core.Serialization;
-using Domain.ConfigurationModels;
-using Persistence.AiServices;
-using Persistence.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --> Log configuration
-Log.Logger = new LoggerConfiguration()
-            .Enrich.WithProperty("SystemName", builder.Configuration["SystemName"])
-            .MinimumLevel.Information()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Override("System", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-            .Enrich.FromLogContext()
-            .WriteTo.Seq(builder.Configuration["Seq:ServerUrl"])
-            .WriteTo.Console()            
-            .WriteTo.File("logs/app.txt", rollingInterval: RollingInterval.Day)            
-            .CreateLogger();
-
-builder.Host.UseSerilog(Log.Logger);
+builder.Host.ConfigureSerilog(builder.Configuration);
 Log.Information("Staring host");
-// Add services to the container.
+
+builder.Services.ConfigureLoggerService();
+builder.Services.ConfigureDbContext(builder.Configuration);
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+builder.Services.ConfigureRedisCaching(builder.Configuration);
+builder.Services.ConfigureServiceManager();
+builder.Services.ConfigureRepositoryManager();
+builder.Services.ConfigureCachingService();
+builder.Services.AddSerilog();
+builder.Services.ConfigureAzureStorage(builder.Configuration);
+builder.Services.ConfigureOpenAI(builder.Configuration);
 
 // --> Register the controllers that are in the presentation class library (Presentation layer)
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
-
-// --> Register DbContext
-builder.Services.AddDbContextPool<AppDbContext>(opt =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("Default");
-    opt.UseNpgsql(connectionString);
-});
-
-// Register Identity
-builder.Services.AddIdentityApiEndpoints<User>(opt =>
-{
-    opt.Password.RequiredLength = 8;
-    opt.User.RequireUniqueEmail = true;
-    opt.Password.RequireNonAlphanumeric = false;
-    opt.SignIn.RequireConfirmedEmail = true;
-})
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
-
-// JWT authetication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-       options.TokenValidationParameters = new TokenValidationParameters
-       {
-           ValidateIssuer = true,
-           ValidateAudience = false,
-           ValidateLifetime = true,
-           ValidIssuers = [builder.Configuration["jwt:validIssuer"]],
-           ValidateIssuerSigningKey = true,
-           IssuerSigningKey = new SymmetricSecurityKey(
-               Encoding.UTF8.GetBytes(builder.Configuration["jwt:key"])),
-           ClockSkew = TimeSpan.Zero
-       }
-    );
-builder.Services.AddAuthorization();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddMemoryCache();
-
-// --> Redis caching config
-builder.Services.AddStackExchangeRedisCache(opt =>
-{
-    string connection = builder.Configuration.GetConnectionString("Redis");
-    opt.Configuration = connection;
-});
-builder.Services.AddSingleton<ICachingService, CachingService>();
-
-// --> Registering the services Manager and Repository Manager
-builder.Services.AddScoped<IServiceManager, ServiceManager>();
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-
-// --> Logger service
-builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
-builder.Services.AddSerilog();
-
-// --> Azure storage
-builder.Services.AddSingleton(p => new BlobServiceClient(builder.Configuration["ConnectionStrings:StorageAccount"]));
-
-// --> OpenAI Configuration
-builder.Services.Configure<OpenAIConfiguration>(builder.Configuration.GetSection(OpenAIConfiguration.SectionName));
-builder.Services.AddScoped<IGenerativeAI, GenerativeAiService>();
-
 
 
 builder.Services.AddControllers().AddJsonOptions(opt =>
 {
     opt.JsonSerializerOptions.IgnoreNullValues = true;
 });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(opt =>
-{
-    opt.EnableAnnotations();
-    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog Post API", Version = "v1" });
-    opt.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme()
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = JwtBearerDefaults.AuthenticationScheme,
-    });
-    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id=JwtBearerDefaults.AuthenticationScheme
-                }
-            },
-            new string[]{}
-        }
-    });
-});
+builder.Services.ConfigureSwagger();
 
 var app = builder.Build();
 app.UseSerilogRequestLogging(opt =>

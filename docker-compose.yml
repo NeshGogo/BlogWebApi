@@ -55,6 +55,13 @@ services:
     command: redis-server --save 20 1 --loglevel warning
     volumes: 
       - cache:/data
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - "16686:16686" # UI
+      - "6831:6831/udp" # Jaeger UDP
+    environment:
+      - LOG_LEVEL=debug
 volumes:
   cache:
     driver: local

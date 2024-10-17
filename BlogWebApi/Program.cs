@@ -4,6 +4,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ConfigureOpenTelemetryLoggin();
 builder.Host.ConfigureSerilog(builder.Configuration);
 Log.Information("Staring host");
 
@@ -21,6 +22,7 @@ builder.Services.ConfigureCachingService();
 builder.Services.AddSerilog();
 builder.Services.ConfigureAzureStorage(builder.Configuration);
 builder.Services.ConfigureOpenAI(builder.Configuration);
+builder.Services.ConfigureOpenTelemetryService(builder.Configuration);
 
 // --> Register the controllers that are in the presentation class library (Presentation layer)
 builder.Services.AddControllers()

@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Persistence;
 using Persistence.AiServices;
 using Persistence.Caching;
@@ -124,4 +127,35 @@ public static class ServiceExtension
             });
         });
 
+    public static void ConfigureOpenTelemetryLoggin(this ILoggingBuilder logging) =>
+        logging
+            .ClearProviders()
+            .AddConsole()
+            .AddDebug()
+            .AddOpenTelemetry(opt =>
+            {
+                opt.AddConsoleExporter()
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                        .AddService("BlogPost.API"))
+                    .AddProcessor(new ActivityEventLogProcessor())
+                    .IncludeScopes = true;
+            });
+
+    public static void ConfigureOpenTelemetryService(this IServiceCollection services, IConfiguration configuration) =>
+        services.AddOpenTelemetry()
+                .WithTracing(builder =>
+                    builder
+                        .AddSource("Tracing.BlogPost.API")
+                        .AddAspNetCoreInstrumentation()
+                        .SetResourceBuilder(
+                            ResourceBuilder
+                                .CreateDefault()
+                                .AddService("Tracing.BlogPost.API"))
+                        .AddConsoleExporter()
+                        .AddJaegerExporter(opt => 
+                        {
+                            var settings = configuration.GetSection("Jeager");
+                            opt.AgentHost = settings.GetValue<string>("Host");
+                            opt.AgentPort = settings.GetValue<int>("Port");
+                        }));
 }
